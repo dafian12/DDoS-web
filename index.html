@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDoS Ultra VIP</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>DDoS Ultra VIP</h1>
+        <p>Enter the target URL and start the attack.</p>
+        
+        <form id="ddosForm">
+            <label for="url">Target URL:</label>
+            <input type="text" id="url" name="url" placeholder="https://example.com" required>
+            <button type="submit">Start DDoS</button>
+        </form>
+        
+        <div id="status" class="status">Waiting for input...</div>
+
+        <!-- Efek Serangan -->
+        <div id="ddosEffect" class="hidden">
+            <p>Simulating attack... <span id="attackProgress">0%</span></p>
+            <div class="progress-bar">
+                <div id="progress" class="progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

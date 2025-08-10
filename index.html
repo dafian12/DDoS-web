@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLi Hunter Pro - Advanced Scanner</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .scanner-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            backdrop-filter: blur(5px);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .scan-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-toggle {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-toggle input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .btn-scan {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-scan:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(238, 90, 36, 0.4);
+        }
+
+        .btn-scan:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .vulnerability-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .vuln-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .vuln-severity {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .critical { background: #ff4757; }
+        .high { background: #ff6348; }
+        .medium { background: #ffa502; }
+        .low { background: #2ed573; }
+
+        .payload-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .payload-section h4 {
+            margin-bottom: 10px;
+            color: #ffa502;
+        }
+
+        .payload-code {
+            background: #2c3e50;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 5px 0;
+        }
+
+        .usage-guide {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .usage-guide h3 {
+            margin-bottom: 20px;
+            color: #ffa502;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .guide-step {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .guide-step::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #ffa502;
+            color: #000;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffa502;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .scanner-card { padding: 20px; }
+            .scan-options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-bug"></i> SQLi Hunter Pro</h1>
+            <p>Advanced SQL Injection Scanner with Real Payload Testing</p>
+        </div>
+
+        <div class="scanner-card">
+            <div class="input-group">
+                <label for="targetUrl"><i class="fas fa-link"></i> Target URL</label>
+                <input type="url" id="targetUrl" placeholder="https://example.com/page.php?id=1" required>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-cogs"></i> Scan Options</label>
+                <div class="scan-options">
+                    <div class="option-toggle">
+                        <input type="checkbox" id="errorBased" checked>
+                        <label for="errorBased">Error-Based</label>
+                    </div>
+                    <div class="option-toggle">
+                        <input type="checkbox" id="unionBased" checked>
+                        <label for="unionBased">Union-Based</label>
+                    </div>
+                    <div class="option-toggle">
+                        <input type="checkbox" id="blind" checked>
+                        <label for="blind">Blind SQLi</label>
+                    </div>
+                    <div class="option-toggle">
+                        <input type="checkbox" id="timeBased" checked>
+                        <label for="timeBased">Time-Based</label>
+                    </div>
+                    <div class="option-toggle">
+                        <input type="checkbox" id="authBypass" checked>
+                        <label for="authBypass">Auth Bypass</label>
+                    </div>
+                    <div class="option-toggle">
+                        <input type="checkbox" id="xssCombo" checked>
+                        <label for="xssCombo">XSS + SQLi Combo</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-scan" onclick="startScan()">
+                <i class="fas fa-search"></i>
+                <span id="scanBtnText">Start Advanced Scan</span>
+            </button>
+        </div>
+
+        <div class="loading" id="loadingSection">
+            <div class="spinner"></div>
+            <p>Scanning target... This may take a while</p>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="vulnCount">0</div>
+                    <div class="stat-label">Vulnerabilities Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="payloadCount">0</div>
+                    <div class="stat-label">Payloads Tested</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="scanTime">0s</div>
+                    <div class="stat-label">Scan Duration</div>
+                </div>
+            </div>
+
+            <div id="vulnerabilityList"></div>
+        </div>
+
+        <div class="scanner-card usage-guide">
+            <h3><i class="fas fa-book"></i> How to Use Payloads</h3>
+            <div class="guide-step">
+                <strong>Copy the payload</strong> from the vulnerability details
+            </div>
+            <div class="guide-step">
+                <strong>Test manually</strong> by replacing parameter values in browser or using tools like SQLMap
+            </div>
+            <div class="guide-step">
+                <strong>For error-based:</strong> Look for SQL error messages in response
+            </div>
+            <div class="guide-step">
+                <strong>For blind/time-based:</strong> Observe response time or content changes
+            </div>
+            <div class="guide-step">
+                <strong>For union-based:</strong> Check for additional data in response
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scanStartTime;
+
+        async function startScan() {
+            const url = document.getElementById('targetUrl').value;
+            if (!url) {
+                alert('Please enter a target URL');
+                return;
+            }
+
+            scanStartTime = Date.now();
+            
+            // Update UI
+            document.getElementById('scanBtnText').textContent = 'Scanning...';
+            document.querySelector('.btn-scan').disabled = true;
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            const options = {
+                errorBased: document.getElementById('errorBased').checked,
+                unionBased: document.getElementById('unionBased').checked,
+                blind: document.getElementById('blind').checked,
+                timeBased: document.getElementById('timeBased').checked,
+                authBypass: document.getElementById('authBypass').checked,
+                xssCombo: document.getElementById('xssCombo').checked
+            };
+
+            try {
+                const response = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url, options })
+                });
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Scan error:', error);
+                alert('Scan failed: ' + error.message);
+            } finally {
+                document.getElementById('loadingSection').style.display = 'none';
+                document.querySelector('.btn-scan').disabled = false;
+                document.getElementById('scanBtnText').textContent = 'Start Advanced Scan';
+            }
+        }
+
+        function displayResults(data) {
+            const vulnCount = data.vulnerabilities?.length || 0;
+            const payloadCount = data.payloadsTested || 0;
+            const scanTime = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+
+            document.getElementById('vulnCount').textContent = vulnCount;
+            document.getElementById('payloadCount').textContent = payloadCount;
+            document.getElementById('scanTime').textContent = scanTime + 's';
+
+            const vulnList = document.getElementById('vulnerabilityList');
+            vulnList.innerHTML = '';
+
+            if (vulnCount === 0) {
+                vulnList.innerHTML = `
+                    <div class="vulnerability-card">
+                        <div class="vuln-header">
+                            <i class="fas fa-shield-alt" style="color: #2ed573; font-size: 1.5rem;"></i>
+                            <h3>No SQL Injection Vulnerabilities Found</h3>
+                        </div>
+                        <p>The target appears to be secure against the tested SQL injection vectors.</p>
+                    </div>
+                `;
+            } else {
+                data.vulnerabilities.forEach(vuln => {
+                    const vulnDiv = document.createElement('div');
+                    vulnDiv.className = 'vulnerability-card';
+                    vulnDiv.innerHTML = `
+                        <div class="vuln-header">
+                            <i class="fas fa-exclamation-triangle" style="color: #ff4757; font-size: 1.5rem;"></i>
+                            <h3>${vuln.type}</h3>
+                            <span class="vuln-severity ${vuln.severity.toLowerCase()}">${vuln.severity}</span>
+                        </div>
+                        <p><strong>Parameter:</strong> ${vuln.parameter}</p>
+                        <p><strong>Description:</strong> ${vuln.description}</p>
+                        <div class="payload-section">
+                            <h4><i class="fas fa-code"></i> Vulnerable Payload</h4>
+                            <div class="payload-code">${vuln.payload}</div>
+                        </div>
+                        <div class="payload-section">
+                            <h4><i class="fas fa-terminal"></i> Usage Example</h4>
+                            <div class="payload-code">${vuln.usage}</div>
+                        </div>
+                    `;
+                    vulnList.appendChild(vulnDiv);
+                });
+            }
+
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

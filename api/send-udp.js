@@ -12,26 +12,25 @@ export default async (req, res) => {
   try {
     const { ip, port, duration } = req.body;
     
-    // Validasi input
     if (!ip || !port || !duration) {
       return res.status(400).json({ 
         error: 'Missing parameters',
-        example: { ip: "192.168.1.1", port: 3000, duration: 60 }
+        details: 'Requires ip, port, and duration' 
       });
     }
 
-    const client = dgram.createSocket('udp4');
-    let packetsSent = 0;
-
-    // Kirim response SUCCESS dulu
+    // Kirim response sukses dulu
     res.status(200).json({ 
       success: true,
       message: `UDP started to ${ip}:${port}`
     });
 
-    // Proses pengiriman
+    // Proses pengiriman (background)
+    const client = dgram.createSocket('udp4');
+    let packetCount = 0;
+
     const interval = setInterval(() => {
-      client.send(`Packet ${++packetsSent}`, port, ip, (err) => {
+      client.send(`Packet ${++packetCount}`, port, ip, (err) => {
         if (err) console.error('UDP Error:', err);
       });
     }, 1000);
@@ -49,18 +48,4 @@ export default async (req, res) => {
       details: error.message 
     });
   }
-};    clearInterval(interval);
-    clearTimeout(timeout);
-    client.close();
-    activeProcesses.delete(id);
-  }
-}            activeRequests.get(requestId).intervalId = intervalId;
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            error: 'Server error',
-            message: error.message
-        });
-    }
-}
+};

@@ -7,12 +7,10 @@
     .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     input, select { width: 100%; padding: 8px; margin-bottom: 10px; }
     button { padding: 10px 15px; margin-right: 10px; }
-    #startBtn { background: #4CAF50; color: white; }
-    #stopBtn { background: #f44336; color: white; display: none; }
     #status { padding: 10px; margin-top: 15px; border-radius: 4px; }
-    .status-ready { background: #2196F3; color: white; }
-    .status-sending { background: #4CAF50; color: white; }
-    .status-error { background: #f44336; color: white; }
+    .ready { background: #2196F3; color: white; }
+    .sending { background: #4CAF50; color: white; }
+    .error { background: #f44336; color: white; }
   </style>
 </head>
 <body>
@@ -25,46 +23,55 @@
       <option value="120">120 seconds</option>
     </select>
     <button id="startBtn">Start</button>
-    <button id="stopBtn">Stop</button>
-    <div id="status" class="status-ready">Ready</div>
+    <div id="status" class="ready">Ready</div>
   </div>
 
   <script>
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const statusDiv = document.getElementById('status');
-
-    async function sendRequest() {
+    document.getElementById('startBtn').addEventListener('click', async () => {
       const ip = document.getElementById('ip').value;
       const port = document.getElementById('port').value;
       const duration = document.getElementById('duration').value;
+      const statusDiv = document.getElementById('status');
 
       if (!ip || !port) {
-        showError("Please enter IP and port");
+        statusDiv.className = 'error';
+        statusDiv.textContent = 'Please enter IP and port';
         return;
       }
 
-      startBtn.disabled = true;
-      statusDiv.className = 'status-sending';
+      statusDiv.className = 'sending';
       statusDiv.textContent = 'Starting...';
 
       try {
-        const response = await fetch('/api/send-udp', {
+        const response = await fetch('https://your-app-name.vercel.app/api/send-udp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ip, port, duration })
         });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Request failed');
+        // First check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error(`Server returned: ${text.substring(0, 50)}`);
         }
 
         const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Request failed');
+        }
+
         statusDiv.textContent = `Sending to ${ip}:${port}`;
-        stopBtn.style.display = 'inline-block';
       } catch (error) {
-        showError(error.message);
+        statusDiv.className = 'error';
+        statusDiv.textContent = `Error: ${error.message}`;
+        console.error('Error details:', error);
+      }
+    });
+  </script>
+</body>
+</html>        showError(error.message);
       }
     }
 

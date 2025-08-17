@@ -4,7 +4,10 @@
     {
       "src": "api/*.js",
       "use": "@vercel/node",
-      "config": { "runtime": "nodejs18.x" }
+      "config": { 
+        "runtime": "nodejs18.x",
+        "includeFiles": ["api/**"]
+      }
     },
     {
       "src": "index.html",

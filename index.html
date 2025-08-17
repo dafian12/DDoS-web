@@ -71,30 +71,4 @@
     });
   </script>
 </body>
-</html>        showError(error.message);
-      }
-    }
-
-    function showError(message) {
-      statusDiv.className = 'status-error';
-      statusDiv.textContent = `Error: ${message}`;
-      startBtn.disabled = false;
-      stopBtn.style.display = 'none';
-    }
-
-    startBtn.addEventListener('click', sendRequest);
-    
-    stopBtn.addEventListener('click', async () => {
-      try {
-        await fetch('/api/stop-udp', { method: 'POST' });
-        statusDiv.className = 'status-ready';
-        statusDiv.textContent = 'Stopped';
-        stopBtn.style.display = 'none';
-        startBtn.disabled = false;
-      } catch (error) {
-        showError("Failed to stop");
-      }
-    });
-  </script>
-</body>
 </html>

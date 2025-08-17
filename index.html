@@ -1,70 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UDP Sender</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UDP Sender</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #startBtn {
+      background: #4CAF50;
+      color: white;
+    }
+    #stopBtn {
+      background: #f44336;
+      color: white;
+    }
+    #status {
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+    .sending { background: #dff0d8; color: #3c763d; }
+    .stopped { background: #f2dede; color: #a94442; }
+    .ready { background: #d9edf7; color: #31708f; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UDP Packet Sender</h1>
+    
+    <div class="form-group">
+      <label for="ip">Target IP:</label>
+      <input type="text" id="ip" placeholder="e.g. 192.168.1.1" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="port">Target Port:</label>
+      <input type="number" id="port" placeholder="e.g. 3000" min="1" max="65535" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="duration">Duration (seconds):</label>
+      <select id="duration">
+        <option value="60">60 seconds</option>
+        <option value="120" selected>120 seconds</option>
+      </select>
+    </div>
+    
+    <button id="startBtn">Start Sending</button>
+    <button id="stopBtn" disabled>Stop Sending</button>
+    
+    <div id="status" class="ready">Status: Ready</div>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusDiv = document.getElementById('status');
+    let isSending = false;
+
+    startBtn.addEventListener('click', async () => {
+      const ip = document.getElementById('ip').value.trim();
+      const port = document.getElementById('port').value;
+      const duration = document.getElementById('duration').value;
+      
+      if (!ip || !port) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      isSending = true;
+      statusDiv.className = 'sending';
+      statusDiv.textContent = `Status: Sending to ${ip}:${port}...`;
+
+      try {
+        const response = await fetch('/api/send-udp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip, port, duration })
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.text());
         }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        button.stop {
-            background-color: #f44336;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .sending {
-            background-color: #dff0d8;
-            color: #3c763d;
-        }
-        .stopped {
-            background-color: #f2dede;
+
+        statusDiv.textContent = `Status: Sent for ${duration} seconds`;
+      } catch (error) {
+        statusDiv.className = 'stopped';
+        statusDiv.textContent = `Error: ${error.message}`;
+      } finally {
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        isSending = false;
+      }
+    });
+
+    stopBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/api/stop-udp', { method: 'POST' });
+        statusDiv.className = 'stopped';
+        statusDiv.textContent = 'Status: Stopped by user';
+      } catch (error) {
+        console.error('Stop error:', error);
+      }
+    });
+  </script>
+</body>
+</html>            background-color: #f2dede;
             color: #a94442;
         }
         .idle {

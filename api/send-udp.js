@@ -1,10 +1,7 @@
 import dgram from 'dgram';
 
-// Simpan state pengiriman
-const activeProcesses = new Map();
-
 export default async (req, res) => {
-  // Handle CORS
+  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
@@ -17,54 +14,42 @@ export default async (req, res) => {
     
     // Validasi input
     if (!ip || !port || !duration) {
-      return res.status(400).json({ error: 'Missing parameters' });
+      return res.status(400).json({ 
+        error: 'Missing parameters',
+        example: { ip: "192.168.1.1", port: 3000, duration: 60 }
+      });
     }
 
     const client = dgram.createSocket('udp4');
-    const processId = Date.now();
     let packetsSent = 0;
 
-    // Kirim response langsung (tidak menunggu proses UDP selesai)
+    // Kirim response SUCCESS dulu
     res.status(200).json({ 
       success: true,
-      message: 'UDP process started'
+      message: `UDP started to ${ip}:${port}`
     });
 
-    // Simpan proses aktif
-    activeProcesses.set(processId, {
-      client,
-      interval: null,
-      timeout: null
-    });
-
-    // Mulai pengiriman paket
+    // Proses pengiriman
     const interval = setInterval(() => {
-      const message = Buffer.from(`Packet ${++packetsSent}`);
-      client.send(message, port, ip, (err) => {
-        if (err) console.error('UDP send error:', err);
+      client.send(`Packet ${++packetsSent}`, port, ip, (err) => {
+        if (err) console.error('UDP Error:', err);
       });
     }, 1000);
 
-    // Auto-stop setelah durasi habis
-    const timeout = setTimeout(() => {
-      cleanupProcess(processId);
+    // Auto-stop setelah durasi
+    setTimeout(() => {
+      clearInterval(interval);
+      client.close();
     }, duration * 1000);
 
-    // Update proses aktif
-    activeProcesses.get(processId).interval = interval;
-    activeProcesses.get(processId).timeout = timeout;
-
   } catch (error) {
-    console.error('Server error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Server Error:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   }
-};
-
-// Fungsi cleanup
-function cleanupProcess(id) {
-  if (activeProcesses.has(id)) {
-    const { client, interval, timeout } = activeProcesses.get(id);
-    clearInterval(interval);
+};    clearInterval(interval);
     clearTimeout(timeout);
     client.close();
     activeProcesses.delete(id);

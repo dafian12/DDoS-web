@@ -1,19 +1,23 @@
 {
   "version": 2,
-  "functions": {
-    "api/scan.py": {
-      "runtime": "python3.9",
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/stress.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
-      "src": "/api/scan",
-      "dest": "/api/scan.py"
+      "src": "/api/stress",
+      "dest": "/api/stress.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/index.html"
     }
   ]
 }

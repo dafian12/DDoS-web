@@ -1,163 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UDP Tool</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #34495e;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        #startBtn {
-            background: #27ae60;
-            color: white;
-        }
-        #stopBtn {
-            background: #e74c3c;
-            color: white;
-        }
-        button:disabled {
-            background: #95a5a6 !important;
-            cursor: not-allowed;
-        }
-        #status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: 500;
-        }
-        .status-ready { background: #3498db; color: white; }
-        .status-sending { background: #2ecc71; color: white; }
-        .status-error { background: #e74c3c; color: white; }
-    </style>
+  <title>UDP Packet Sender</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f0f2f5;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #startBtn {
+      background: #27ae60;
+      color: white;
+    }
+    #stopBtn {
+      background: #e74c3c;
+      color: white;
+      display: none;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .status-ready { background: #3498db; color: white; }
+    .status-sending { background: #2ecc71; color: white; }
+    .status-error { background: #e74c3c; color: white; }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>UDP Packet Tool</h1>
-        
-        <div class="input-group">
-            <label for="ip">Target IP</label>
-            <input type="text" id="ip" placeholder="192.168.1.1" required>
-        </div>
-        
-        <div class="input-group">
-            <label for="port">Port</label>
-            <input type="number" id="port" placeholder="3000" min="1" max="65535" required>
-        </div>
-        
-        <div class="input-group">
-            <label for="duration">Duration (seconds)</label>
-            <select id="duration">
-                <option value="60">60 sec</option>
-                <option value="120">120 sec</option>
-            </select>
-        </div>
-        
-        <div class="btn-group">
-            <button id="startBtn">START</button>
-            <button id="stopBtn" disabled>STOP</button>
-        </div>
-        
-        <div id="status" class="status-ready">Ready to send</div>
+  <div class="card">
+    <h1>UDP Packet Sender</h1>
+    
+    <div class="input-group">
+      <label for="ip">Target IP</label>
+      <input type="text" id="ip" placeholder="192.168.1.1" required>
     </div>
+    
+    <div class="input-group">
+      <label for="port">Port</label>
+      <input type="number" id="port" placeholder="3000" min="1" max="65535" required>
+    </div>
+    
+    <div class="input-group">
+      <label for="duration">Duration (seconds)</label>
+      <select id="duration">
+        <option value="60">60</option>
+        <option value="120">120</option>
+      </select>
+    </div>
+    
+    <div class="btn-group">
+      <button id="startBtn">START</button>
+      <button id="stopBtn">STOP</button>
+    </div>
+    
+    <div id="status" class="status-ready">Ready</div>
+  </div>
 
-    <script>
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const statusDiv = document.getElementById('status');
-        
-        startBtn.addEventListener('click', async () => {
-            const ip = document.getElementById('ip').value.trim();
-            const port = document.getElementById('port').value;
-            const duration = document.getElementById('duration').value;
-            
-            if (!ip || !port) {
-                statusDiv.className = 'status-error';
-                statusDiv.textContent = 'Please enter valid IP and port';
-                return;
-            }
-            
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-            statusDiv.className = 'status-sending';
-            statusDiv.textContent = `Sending to ${ip}:${port}...`;
-            
-            try {
-                const response = await fetch('/api/send-udp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ip, port, duration })
-                });
-                
-                if (!response.ok) throw new Error('Failed to start');
-                
-                const data = await response.json();
-                statusDiv.textContent = `Sending complete (${duration}s)`;
-            } catch (error) {
-                statusDiv.className = 'status-error';
-                statusDiv.textContent = `Error: ${error.message}`;
-            } finally {
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
-            }
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusDiv = document.getElementById('status');
+
+    startBtn.addEventListener('click', async () => {
+      const ip = document.getElementById('ip').value.trim();
+      const port = document.getElementById('port').value;
+      const duration = document.getElementById('duration').value;
+      
+      if (!ip || !port) {
+        showError('Please enter IP and port');
+        return;
+      }
+
+      startBtn.disabled = true;
+      stopBtn.style.display = 'block';
+      statusDiv.className = 'status-sending';
+      statusDiv.textContent = 'Starting...';
+
+      try {
+        const response = await fetch('/api/send-udp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip, port: Number(port), duration: Number(duration) })
         });
-        
-        stopBtn.addEventListener('click', async () => {
-            try {
-                await fetch('/api/stop-udp', { method: 'POST' });
-                statusDiv.className = 'status-ready';
-                statusDiv.textContent = 'Stopped by user';
-            } catch (error) {
-                statusDiv.className = 'status-error';
-                statusDiv.textContent = 'Stop failed';
-            }
-        });
-    </script>
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to start');
+        }
+
+        statusDiv.textContent = `Sending to ${ip}:${port}`;
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    stopBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/api/stop-udp', { method: 'POST' });
+        statusDiv.className = 'status-ready';
+        statusDiv.textContent = 'Stopped';
+        stopBtn.style.display = 'none';
+        startBtn.disabled = false;
+      } catch (error) {
+        showError('Failed to stop');
+      }
+    });
+
+    function showError(message) {
+      statusDiv.className = 'status-error';
+      statusDiv.textContent = `Error: ${message}`;
+      startBtn.disabled = false;
+      stopBtn.style.display = 'none';
+    }
+  </script>
 </body>
 </html>

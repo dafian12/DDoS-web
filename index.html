@@ -23,7 +23,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
@@ -106,6 +106,15 @@
             color: #222;
         }
         
+        .location-name {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-style: italic;
+            border-left: 4px solid #4a6cf7;
+        }
+        
         .controls {
             display: flex;
             justify-content: center;
@@ -134,6 +143,11 @@
             color: white;
         }
         
+        #open-google-maps {
+            background: linear-gradient(to right, #4285F4, #34A853);
+            color: white;
+        }
+        
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
@@ -144,6 +158,261 @@
         }
         
         .status {
+            text-align: center;
+            padding: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            margin: 0 20px 20px;
+        }
+        
+        .tracking {
+            background-color: #e6f7ee;
+            color: #00b09b;
+        }
+        
+        .not-tracking {
+            background-color: #ffe6e6;
+            color: #ff416c;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .map-container, .info-panel {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Real-Time Geolocation Tracker</h1>
+            <p class="subtitle">Lacak lokasi Anda secara real-time dengan peta interaktif</p>
+        </header>
+        
+        <div class="status not-tracking" id="status">
+            Tracking belum dimulai
+        </div>
+        
+        <div class="content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-box">
+                    <h3 class="info-title">Informasi Lokasi</h3>
+                    <div class="data-row">
+                        <span class="data-label">Latitude:</span>
+                        <span class="data-value" id="latitude">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Longitude:</span>
+                        <span class="data-value" id="longitude">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Akurasi:</span>
+                        <span class="data-value" id="accuracy">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Ketinggian:</span>
+                        <span class="data-value" id="altitude">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Kecepatan:</span>
+                        <span class="data-value" id="speed">-</span>
+                    </div>
+                    
+                    <h3 class="info-title" style="margin-top: 20px;">Nama Lokasi</h3>
+                    <div class="location-name" id="location-name">Lokasi belum terdeteksi</div>
+                </div>
+                
+                <div class="info-box">
+                    <h3 class="info-title">Informasi Tambahan</h3>
+                    <div class="data-row">
+                        <span class="data-label">Waktu Pembaruan:</span>
+                        <span class="data-value" id="timestamp">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Status:</span>
+                        <span class="data-value" id="status-info">Tidak aktif</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="start-tracking">Mulai Tracking</button>
+            <button id="stop-tracking">Hentikan Tracking</button>
+            <button id="open-google-maps">Buka di Google Maps</button>
+        </div>
+        
+        <footer>
+            <p>© 2023 Real-Time Geolocation Tracker | Hak Cipta Dilindungi</p>
+            <p>Lokasi Anda tidak disimpan di server manapun</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Inisialisasi variabel
+        let map, marker, watchId, currentLat, currentLng;
+        const latitudeElement = document.getElementById('latitude');
+        const longitudeElement = document.getElementById('longitude');
+        const accuracyElement = document.getElementById('accuracy');
+        const altitudeElement = document.getElementById('altitude');
+        const speedElement = document.getElementById('speed');
+        const timestampElement = document.getElementById('timestamp');
+        const statusInfoElement = document.getElementById('status-info');
+        const statusElement = document.getElementById('status');
+        const locationNameElement = document.getElementById('location-name');
+        const startButton = document.getElementById('start-tracking');
+        const stopButton = document.getElementById('stop-tracking');
+        const googleMapsButton = document.getElementById('open-google-maps');
+        
+        // Inisialisasi peta
+        function initMap(lat = -6.2088, lng = 106.8456) {
+            map = L.map('map').setView([lat, lng], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Tambahkan marker
+            marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup('Lokasi Anda saat ini')
+                .openPopup();
+        }
+        
+        // Perbarui peta dan marker
+        function updateMap(lat, lng) {
+            map.setView([lat, lng], 15);
+            marker.setLatLng([lat, lng]);
+        }
+        
+        // Dapatkan nama lokasi dari koordinat
+        async function getLocationName(lat, lng) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                const data = await response.json();
+                
+                if (data && data.display_name) {
+                    return data.display_name;
+                } else {
+                    return "Nama lokasi tidak ditemukan";
+                }
+            } catch (error) {
+                console.error("Error mendapatkan nama lokasi:", error);
+                return "Tidak dapat mengambil nama lokasi";
+            }
+        }
+        
+        // Buka Google Maps dengan lokasi saat ini
+        function openGoogleMaps() {
+            if (currentLat && currentLng) {
+                window.open(`https://www.google.com/maps?q=${currentLat},${currentLng}&z=15`, '_blank');
+            } else {
+                alert("Lokasi belum terdeteksi. Silakan mulai tracking terlebih dahulu.");
+            }
+        }
+        
+        // Mulai melacak lokasi
+        async function startTracking() {
+            if ("geolocation" in navigator) {
+                statusElement.className = 'status tracking';
+                statusElement.textContent = 'Sedang melacak lokasi...';
+                statusInfoElement.textContent = 'Aktif';
+                
+                // Dapatkan posisi saat ini
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        updateDisplay(position);
+                        initMap(position.coords.latitude, position.coords.longitude);
+                        
+                        // Dapatkan nama lokasi
+                        const locationName = await getLocationName(position.coords.latitude, position.coords.longitude);
+                        locationNameElement.textContent = locationName;
+                    },
+                    (error) => {
+                        alert('Error mendapatkan lokasi: ' + error.message);
+                    }
+                );
+                
+                // Lacak perubahan posisi
+                watchId = navigator.geolocation.watchPosition(
+                    async (position) => {
+                        updateDisplay(position);
+                        updateMap(position.coords.latitude, position.coords.longitude);
+                        
+                        // Dapatkan nama lokasi
+                        const locationName = await getLocationName(position.coords.latitude, position.coords.longitude);
+                        locationNameElement.textContent = locationName;
+                    },
+                    (error) => {
+                        alert('Error melacak lokasi: ' + error.message);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+                
+            } else {
+                alert('Geolocation tidak didukung oleh browser Anda.');
+            }
+        }
+        
+        // Hentikan pelacakan
+        function stopTracking() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                
+                statusElement.className = 'status not-tracking';
+                statusElement.textContent = 'Tracking dihentikan';
+                statusInfoElement.textContent = 'Tidak aktif';
+            }
+        }
+        
+        // Perbarui tampilan informasi lokasi
+        function updateDisplay(position) {
+            const coords = position.coords;
+            currentLat = coords.latitude;
+            currentLng = coords.longitude;
+            
+            latitudeElement.textContent = coords.latitude.toFixed(6);
+            longitudeElement.textContent = coords.longitude.toFixed(6);
+            accuracyElement.textContent = coords.accuracy.toFixed(2) + ' meter';
+            altitudeElement.textContent = coords.altitude ? coords.altitude.toFixed(2) + ' meter' : 'Tidak tersedia';
+            speedElement.textContent = coords.speed ? (coords.speed * 3.6).toFixed(2) + ' km/jam' : 'Tidak tersedia';
+            
+            const now = new Date();
+            timestampElement.textContent = now.toLocaleTimeString();
+        }
+        
+        // Event listeners untuk tombol
+        startButton.addEventListener('click', startTracking);
+        stopButton.addEventListener('click', stopTracking);
+        googleMapsButton.addEventListener('click', openGoogleMaps);
+        
+        // Inisialisasi peta dengan lokasi default (Jakarta)
+        initMap();
+    </script>
+</body>
+</html>        .status {
             text-align: center;
             padding: 15px;
             font-weight: 500;

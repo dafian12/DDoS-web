@@ -1,28 +1,357 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<title>Login Bug-Hunter Suite</title>
-<style>
- body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#111;color:#0f0;font-family:monospace}
- input,button{padding:10px;font-size:1rem}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Geolocation Tracker</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #4a6cf7, #6a82fb);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .map-container {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+        }
+        
+        .info-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-title {
+            font-size: 1.2rem;
+            color: #4a6cf7;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .data-value {
+            font-weight: 500;
+            color: #222;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        #start-tracking {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+        }
+        
+        #stop-tracking {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            margin: 0 20px 20px;
+        }
+        
+        .tracking {
+            background-color: #e6f7ee;
+            color: #00b09b;
+        }
+        
+        .not-tracking {
+            background-color: #ffe6e6;
+            color: #ff416c;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .map-container, .info-panel {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
- <div>
-  <h2>🔓 Bug-Hunter Suite</h2>
-  <input id="k" type="password" placeholder="Key" />
-  <button onclick="cek()">Unlock</button>
- </div>
-<script>
-function cek(){
- if(document.getElementById('k').value === 'daf12**'){
-   localStorage.setItem('bug_key','daf12**');
-   location.href='/dashboard.html';
- }else{
-   alert('Key salah!');
- }
-}
-</script>
+    <div class="container">
+        <header>
+            <h1>Real-Time Geolocation Tracker</h1>
+            <p class="subtitle">Lacak lokasi Anda secara real-time dengan peta interaktif</p>
+        </header>
+        
+        <div class="status not-tracking" id="status">
+            Tracking belum dimulai
+        </div>
+        
+        <div class="content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-box">
+                    <h3 class="info-title">Informasi Lokasi</h3>
+                    <div class="data-row">
+                        <span class="data-label">Latitude:</span>
+                        <span class="data-value" id="latitude">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Longitude:</span>
+                        <span class="data-value" id="longitude">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Akurasi:</span>
+                        <span class="data-value" id="accuracy">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Ketinggian:</span>
+                        <span class="data-value" id="altitude">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Kecepatan:</span>
+                        <span class="data-value" id="speed">-</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h3 class="info-title">Informasi Tambahan</h3>
+                    <div class="data-row">
+                        <span class="data-label">Waktu Pembaruan:</span>
+                        <span class="data-value" id="timestamp">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Status:</span>
+                        <span class="data-value" id="status-info">Tidak aktif</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="start-tracking">Mulai Tracking</button>
+            <button id="stop-tracking">Hentikan Tracking</button>
+        </div>
+        
+        <footer>
+            <p>© 2023 Real-Time Geolocation Tracker | Hak Cipta Dilindungi</p>
+            <p>Lokasi Anda tidak disimpan di server manapun</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Inisialisasi variabel
+        let map, marker, watchId;
+        const latitudeElement = document.getElementById('latitude');
+        const longitudeElement = document.getElementById('longitude');
+        const accuracyElement = document.getElementById('accuracy');
+        const altitudeElement = document.getElementById('altitude');
+        const speedElement = document.getElementById('speed');
+        const timestampElement = document.getElementById('timestamp');
+        const statusInfoElement = document.getElementById('status-info');
+        const statusElement = document.getElementById('status');
+        const startButton = document.getElementById('start-tracking');
+        const stopButton = document.getElementById('stop-tracking');
+        
+        // Inisialisasi peta
+        function initMap(lat = -6.2088, lng = 106.8456) {
+            map = L.map('map').setView([lat, lng], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Tambahkan marker
+            marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup('Lokasi Anda saat ini')
+                .openPopup();
+        }
+        
+        // Perbarui peta dan marker
+        function updateMap(lat, lng) {
+            map.setView([lat, lng], 15);
+            marker.setLatLng([lat, lng]);
+        }
+        
+        // Mulai melacak lokasi
+        function startTracking() {
+            if ("geolocation" in navigator) {
+                statusElement.className = 'status tracking';
+                statusElement.textContent = 'Sedang melacak lokasi...';
+                statusInfoElement.textContent = 'Aktif';
+                
+                // Dapatkan posisi saat ini
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        updateDisplay(position);
+                        initMap(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        alert('Error mendapatkan lokasi: ' + error.message);
+                    }
+                );
+                
+                // Lacak perubahan posisi
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        updateDisplay(position);
+                        updateMap(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        alert('Error melacak lokasi: ' + error.message);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+                
+            } else {
+                alert('Geolocation tidak didukung oleh browser Anda.');
+            }
+        }
+        
+        // Hentikan pelacakan
+        function stopTracking() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                
+                statusElement.className = 'status not-tracking';
+                statusElement.textContent = 'Tracking dihentikan';
+                statusInfoElement.textContent = 'Tidak aktif';
+            }
+        }
+        
+        // Perbarui tampilan informasi lokasi
+        function updateDisplay(position) {
+            const coords = position.coords;
+            latitudeElement.textContent = coords.latitude.toFixed(6);
+            longitudeElement.textContent = coords.longitude.toFixed(6);
+            accuracyElement.textContent = coords.accuracy.toFixed(2) + ' meter';
+            altitudeElement.textContent = coords.altitude ? coords.altitude.toFixed(2) + ' meter' : 'Tidak tersedia';
+            speedElement.textContent = coords.speed ? (coords.speed * 3.6).toFixed(2) + ' km/jam' : 'Tidak tersedia';
+            
+            const now = new Date();
+            timestampElement.textContent = now.toLocaleTimeString();
+        }
+        
+        // Event listeners untuk tombol
+        startButton.addEventListener('click', startTracking);
+        stopButton.addEventListener('click', stopTracking);
+        
+        // Inisialisasi peta dengan lokasi default (Jakarta)
+        initMap();
+    </script>
 </body>
-</html>
+                         </html>

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Geolocation Tracker</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <title>Coin Crash - Game Virtual Multiplayer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -14,183 +14,408 @@
         }
         
         body {
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            color: #333;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
             min-height: 100vh;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-blend-mode: overlay;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: rgba(255, 255, 255, 0.95);
+            width: 100%;
+            max-width: 900px;
+            background: rgba(0, 0, 0, 0.85);
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
         
         header {
-            background: linear-gradient(to right, #4a6cf7, #6a82fb);
-            color: white;
-            padding: 25px;
+            grid-column: 1 / -1;
             text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 10px;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
         }
         
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .content {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 20px;
-        }
-        
-        .map-container {
-            flex: 1;
-            min-width: 300px;
-            height: 400px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .info-panel {
-            flex: 1;
-            min-width: 300px;
-            padding: 20px;
-        }
-        
-        .info-box {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .info-title {
-            font-size: 1.2rem;
-            color: #4a6cf7;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .data-row {
+        .user-info {
+            grid-column: 1 / -1;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
-            padding: 8px 0;
-            border-bottom: 1px dashed #f0f0f0;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
         }
         
-        .data-label {
-            font-weight: 600;
-            color: #555;
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .data-value {
-            font-weight: 500;
-            color: #222;
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #00ff88;
+            object-fit: cover;
+            cursor: pointer;
         }
         
-        .location-name {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-style: italic;
-            border-left: 4px solid #4a6cf7;
+        .coin-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ff88;
         }
         
-        .controls {
+        .username {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .game-area {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+        }
+        
+        .multiplier-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 20px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+            height: 70px;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            padding: 20px;
+            align-items: center;
+        }
+        
+        .graph-container {
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #00ff88;
+        }
+        
+        .graph-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+        }
+        
+        .bet-controls {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        .bet-amount {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 1px solid #00ff88;
+        }
+        
+        .bet-buttons {
+            display: flex;
+            gap: 10px;
         }
         
         button {
-            padding: 12px 25px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 8px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
         }
         
-        #start-tracking {
-            background: linear-gradient(to right, #00b09b, #96c93d);
+        .btn-bet {
+            background: linear-gradient(to right, #00ff88, #00cc6a);
+            color: #000;
+            flex: 1;
+            font-size: 1.1rem;
+        }
+        
+        .btn-bet:hover {
+            background: linear-gradient(to right, #00cc6a, #00aa55);
+            transform: scale(1.05);
+        }
+        
+        .btn-cashout {
+            background: linear-gradient(to right, #ff3366, #cc2854);
+            color: white;
+            flex: 1;
+            font-size: 1.1rem;
+        }
+        
+        .btn-cashout:hover {
+            background: linear-gradient(to right, #cc2854, #aa2045);
+            transform: scale(1.05);
+        }
+        
+        .btn-action {
+            background: linear-gradient(to right, #3366ff, #2854cc);
             color: white;
         }
         
-        #stop-tracking {
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
-            color: white;
+        .btn-action:hover {
+            background: linear-gradient(to right, #2854cc, #2045aa);
+            transform: scale(1.05);
         }
         
-        #open-google-maps {
-            background: linear-gradient(to right, #4285F4, #34A853);
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .status {
-            text-align: center;
-            padding: 15px;
-            font-weight: 500;
+        .history {
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
-            margin: 0 20px 20px;
+            padding: 15px;
+            border: 1px solid #00ff88;
         }
         
-        .tracking {
-            background-color: #e6f7ee;
-            color: #00b09b;
-        }
-        
-        .not-tracking {
-            background-color: #ffe6e6;
-            color: #ff416c;
-        }
-        
-        footer {
+        .history-title {
             text-align: center;
+            margin-bottom: 10px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .history-items {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px;
+        }
+        
+        .history-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 12px;
+            border-radius: 8px;
+            min-width: 70px;
+            text-align: center;
+        }
+        
+        .win {
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+        
+        .lose {
+            color: #ff3366;
+            border: 1px solid #ff3366;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .chat-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
             padding: 20px;
-            color: #777;
-            font-size: 0.9rem;
-            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            height: 550px;
+            border: 1px solid #00ff88;
+        }
+        
+        .chat-title {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .online-players {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .player-tag {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid #00ff88;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .message.sender {
+            background: rgba(0, 255, 136, 0.2);
+        }
+        
+        .message-system {
+            color: #00ff88;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .message-player {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .player-avatar {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .chat-input button {
+            padding: 10px 15px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modal-content {
+            background: #0f2027;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid #00ff88;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #00ff88;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 1px solid #00ff88;
+        }
+        
+        .avatar-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .avatar-option:hover, .avatar-option.selected {
+            border: 2px solid #00ff88;
+            transform: scale(1.1);
         }
         
         @media (max-width: 768px) {
-            .content {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .bet-controls {
                 flex-direction: column;
             }
             
-            .map-container, .info-panel {
-                width: 100%;
-                margin-bottom: 20px;
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
@@ -198,218 +423,478 @@
 <body>
     <div class="container">
         <header>
-            <h1>Real-Time Geolocation Tracker</h1>
-            <p class="subtitle">Lacak lokasi Anda secara real-time dengan peta interaktif</p>
+            <h1>COIN CRASH</h1>
+            <button class="btn-action" id="change-bg-btn"><i class="fas fa-image"></i> Ganti Background</button>
         </header>
         
-        <div class="status not-tracking" id="status">
-            Tracking belum dimulai
+        <div class="user-info">
+            <div class="profile-section">
+                <img src="https://api.dicebear.com/6.x/adventurer/svg?seed=Player" class="profile-pic" id="profile-pic" alt="Profile">
+                <div class="username">Nama: <span id="player-name">Player</span></div>
+            </div>
+            <div class="coin-display">Koin: <span id="coin-amount">100.000</span></div>
         </div>
         
-        <div class="content">
-            <div class="map-container">
-                <div id="map"></div>
+        <div class="game-area">
+            <div class="multiplier-display" id="multiplier-display">
+                x1.00
             </div>
             
-            <div class="info-panel">
-                <div class="info-box">
-                    <h3 class="info-title">Informasi Lokasi</h3>
-                    <div class="data-row">
-                        <span class="data-label">Latitude:</span>
-                        <span class="data-value" id="latitude">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Longitude:</span>
-                        <span class="data-value" id="longitude">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Akurasi:</span>
-                        <span class="data-value" id="accuracy">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Ketinggian:</span>
-                        <span class="data-value" id="altitude">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Kecepatan:</span>
-                        <span class="data-value" id="speed">-</span>
-                    </div>
-                    
-                    <h3 class="info-title" style="margin-top: 20px;">Nama Lokasi</h3>
-                    <div class="location-name" id="location-name">Lokasi belum terdeteksi</div>
+            <div class="graph-container" id="graph-container">
+                <div class="graph-line" id="graph-line"></div>
+            </div>
+            
+            <div class="bet-controls">
+                <input type="number" class="bet-amount" id="bet-amount" placeholder="Jumlah taruhan" value="100" min="10">
+                <div class="bet-buttons">
+                    <button class="btn-bet" id="bet-btn">BET</button>
+                    <button class="btn-cashout" id="cashout-btn" disabled>CASHOUT</button>
                 </div>
-                
-                <div class="info-box">
-                    <h3 class="info-title">Informasi Tambahan</h3>
-                    <div class="data-row">
-                        <span class="data-label">Waktu Pembaruan:</span>
-                        <span class="data-value" id="timestamp">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Status:</span>
-                        <span class="data-value" id="status-info">Tidak aktif</span>
-                    </div>
+            </div>
+            
+            <div class="history">
+                <div class="history-title">History Multiplier</div>
+                <div class="history-items" id="history-items">
+                    <div class="history-item win">x2.45</div>
+                    <div class="history-item lose">x1.05</div>
+                    <div class="history-item win">x3.20</div>
+                    <div class="history-item win">x2.10</div>
+                    <div class="history-item lose">x1.20</div>
                 </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn-action" id="half-btn">1/2</button>
+                <button class="btn-action" id="double-btn">2X</button>
+                <button class="btn-action" id="max-btn">MAX</button>
             </div>
         </div>
         
-        <div class="controls">
-            <button id="start-tracking">Mulai Tracking</button>
-            <button id="stop-tracking">Hentikan Tracking</button>
-            <button id="open-google-maps">Buka di Google Maps</button>
+        <div class="chat-area">
+            <div class="chat-title">Chat Publik</div>
+            <div class="online-players" id="online-players">
+                <div class="player-tag">Player1 (Online)</div>
+                <div class="player-tag">Player2 (Online)</div>
+                <div class="player-tag">Player3 (Online)</div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message message-system">Selamat datang di Coin Crash Game! Anda mendapatkan 100.000 koin virtual.</div>
+                <div class="message message-system">Chat ini hanya untuk hiburan, bukan untuk judi sungguhan.</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Ketik pesan di sini...">
+                <button class="btn-bet" id="send-chat-btn">Kirim</button>
+            </div>
         </div>
-        
-        <footer>
-            <p>© 2023 Real-Time Geolocation Tracker | Hak Cipta Dilindungi</p>
-            <p>Lokasi Anda tidak disimpan di server manapun</p>
-        </footer>
+    </div>
+    
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <h2>Masuk ke Game</h2>
+            <p>Silakan masukkan nama player Anda:</p>
+            <input type="text" class="modal-input" id="player-name-input" placeholder="Nama Player">
+            <p id="name-error" style="color: #ff3366; display: none;">Nama sudah digunakan, silakan pilih nama lain.</p>
+            
+            <div class="avatar-options">
+                <img src="https://api.dicebear.com/6.x/adventurer/svg?seed=Player1" class="avatar-option selected" data-seed="Player1">
+                <img src="https://api.dicebear.com/6.x/adventurer/svg?seed=Player2" class="avatar-option" data-seed="Player2">
+                <img src="https://api.dicebear.com/6.x/adventurer/svg?seed=Player3" class="avatar-option" data-seed="Player3">
+                <img src="https://api.dicebear.com/6.x/adventurer/svg?seed=Player4" class="avatar-option" data-seed="Player4">
+            </div>
+            
+            <button class="btn-bet" id="login-btn">Masuk</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="win-modal">
+        <div class="modal-content">
+            <h2>Cashout Berhasil!</h2>
+            <p>Anda berhasil mencairkan pada multiplier: <span id="cashout-multiplier">x0.00</span></p>
+            <p>Koin yang didapat: <span id="win-amount">0</span></p>
+            <button class="btn-bet" id="win-close">Lanjutkan</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="lose-modal">
+        <div class="modal-content">
+            <h2>Coin Crash!</h2>
+            <p>Multiplier mencapai: <span id="crash-multiplier">x0.00</span></p>
+            <p>Taruhan Anda hangus.</p>
+            <button class="btn-cashout" id="lose-close">Coba Lagi</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="bg-modal">
+        <div class="modal-content">
+            <h2>Pilih Background</h2>
+            <div class="avatar-options">
+                <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="avatar-option selected" data-bg="space">
+                <img src="https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="avatar-option" data-bg="clouds">
+                <img src="https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="avatar-option" data-bg="galaxy">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="avatar-option" data-bg="sky">
+            </div>
+            <button class="btn-bet" id="bg-close">Simpan</button>
+        </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Inisialisasi variabel
-        let map, marker, watchId, currentLat, currentLng;
-        const latitudeElement = document.getElementById('latitude');
-        const longitudeElement = document.getElementById('longitude');
-        const accuracyElement = document.getElementById('accuracy');
-        const altitudeElement = document.getElementById('altitude');
-        const speedElement = document.getElementById('speed');
-        const timestampElement = document.getElementById('timestamp');
-        const statusInfoElement = document.getElementById('status-info');
-        const statusElement = document.getElementById('status');
-        const locationNameElement = document.getElementById('location-name');
-        const startButton = document.getElementById('start-tracking');
-        const stopButton = document.getElementById('stop-tracking');
-        const googleMapsButton = document.getElementById('open-google-maps');
-        
-        // Inisialisasi peta
-        function initMap(lat = -6.2088, lng = 106.8456) {
-            map = L.map('map').setView([lat, lng], 15);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data game
+            let coins = 100000;
+            let currentBet = 0;
+            let isPlaying = false;
+            let currentMultiplier = 1.0;
+            let crashPoint = 0;
+            let gameInterval;
+            let playerName = "Player";
+            let usedNames = ["Player1", "Player2", "Player3"];
+            let avatarSeed = "Player1";
+            let background = "space";
             
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            // Elemen DOM
+            const coinDisplay = document.getElementById('coin-amount');
+            const multiplierDisplay = document.getElementById('multiplier-display');
+            const graphLine = document.getElementById('graph-line');
+            const betAmountInput = document.getElementById('bet-amount');
+            const betButton = document.getElementById('bet-btn');
+            const cashoutButton = document.getElementById('cashout-btn');
+            const historyItems = document.getElementById('history-items');
+            const winModal = document.getElementById('win-modal');
+            const loseModal = document.getElementById('lose-modal');
+            const loginModal = document.getElementById('login-modal');
+            const bgModal = document.getElementById('bg-modal');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendChatBtn = document.getElementById('send-chat-btn');
+            const onlinePlayers = document.getElementById('online-players');
+            const profilePic = document.getElementById('profile-pic');
             
-            // Tambahkan marker
-            marker = L.marker([lat, lng]).addTo(map)
-                .bindPopup('Lokasi Anda saat ini')
-                .openPopup();
-        }
-        
-        // Perbarui peta dan marker
-        function updateMap(lat, lng) {
-            map.setView([lat, lng], 15);
-            marker.setLatLng([lat, lng]);
-        }
-        
-        // Dapatkan nama lokasi dari koordinat
-        async function getLocationName(lat, lng) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-                const data = await response.json();
+            // Tampilkan modal login pertama kali
+            loginModal.style.display = 'flex';
+            
+            // Inisialisasi game
+            initGame();
+            
+            // Fungsi inisialisasi game
+            function initGame() {
+                // Update tampilan koin
+                updateCoins(0);
                 
-                if (data && data.display_name) {
-                    return data.display_name;
-                } else {
-                    return "Nama lokasi tidak ditemukan";
+                // Event listeners
+                betButton.addEventListener('click', placeBet);
+                cashoutButton.addEventListener('click', cashout);
+                
+                document.getElementById('half-btn').addEventListener('click', function() {
+                    setBetAmount(Math.max(10, Math.floor(currentBet / 2)));
+                });
+                
+                document.getElementById('double-btn').addEventListener('click', function() {
+                    setBetAmount(currentBet * 2);
+                });
+                
+                document.getElementById('max-btn').addEventListener('click', function() {
+                    setBetAmount(coins);
+                });
+                
+                sendChatBtn.addEventListener('click', sendChatMessage);
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendChatMessage();
+                    }
+                });
+                
+                document.getElementById('change-bg-btn').addEventListener('click', function() {
+                    bgModal.style.display = 'flex';
+                });
+                
+                document.getElementById('bg-close').addEventListener('click', function() {
+                    bgModal.style.display = 'none';
+                });
+                
+                // Event listener untuk modal buttons
+                document.getElementById('win-close').addEventListener('click', function() {
+                    winModal.style.display = 'none';
+                });
+                
+                document.getElementById('lose-close').addEventListener('click', function() {
+                    loseModal.style.display = 'none';
+                });
+                
+                document.getElementById('login-btn').addEventListener('click', loginPlayer);
+                
+                // Event listener untuk avatar selection
+                document.querySelectorAll('.avatar-option').forEach(avatar => {
+                    avatar.addEventListener('click', function() {
+                        document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
+                        this.classList.add('selected');
+                        
+                        if (this.dataset.seed) {
+                            avatarSeed = this.dataset.seed;
+                            profilePic.src = `https://api.dicebear.com/6.x/adventurer/svg?seed=${avatarSeed}`;
+                        } else if (this.dataset.bg) {
+                            background = this.dataset.bg;
+                            changeBackground(background);
+                        }
+                    });
+                });
+                
+                // Event listener untuk background selection
+                document.querySelectorAll('.avatar-option[data-bg]').forEach(bg => {
+                    bg.addEventListener('click', function() {
+                        document.querySelectorAll('.avatar-option[data-bg]').forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        background = this.dataset.bg;
+                        changeBackground(background);
+                    });
+                });
+                
+                // Update daftar pemain online
+                updateOnlinePlayers();
+            }
+            
+            // Login player
+            function loginPlayer() {
+                const nameInput = document.getElementById('player-name-input');
+                const nameError = document.getElementById('name-error');
+                const name = nameInput.value.trim();
+                
+                if (name === '') {
+                    nameError.textContent = "Nama tidak boleh kosong!";
+                    nameError.style.display = 'block';
+                    return;
                 }
-            } catch (error) {
-                console.error("Error mendapatkan nama lokasi:", error);
-                return "Tidak dapat mengambil nama lokasi";
-            }
-        }
-        
-        // Buka Google Maps dengan lokasi saat ini
-        function openGoogleMaps() {
-            if (currentLat && currentLng) {
-                window.open(`https://www.google.com/maps?q=${currentLat},${currentLng}&z=15`, '_blank');
-            } else {
-                alert("Lokasi belum terdeteksi. Silakan mulai tracking terlebih dahulu.");
-            }
-        }
-        
-        // Mulai melacak lokasi
-        async function startTracking() {
-            if ("geolocation" in navigator) {
-                statusElement.className = 'status tracking';
-                statusElement.textContent = 'Sedang melacak lokasi...';
-                statusInfoElement.textContent = 'Aktif';
                 
-                // Dapatkan posisi saat ini
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        updateDisplay(position);
-                        initMap(position.coords.latitude, position.coords.longitude);
-                        
-                        // Dapatkan nama lokasi
-                        const locationName = await getLocationName(position.coords.latitude, position.coords.longitude);
-                        locationNameElement.textContent = locationName;
-                    },
-                    (error) => {
-                        alert('Error mendapatkan lokasi: ' + error.message);
-                    }
-                );
+                if (usedNames.includes(name)) {
+                    nameError.textContent = "Nama sudah digunakan, silakan pilih nama lain.";
+                    nameError.style.display = 'block';
+                    return;
+                }
                 
-                // Lacak perubahan posisi
-                watchId = navigator.geolocation.watchPosition(
-                    async (position) => {
-                        updateDisplay(position);
-                        updateMap(position.coords.latitude, position.coords.longitude);
-                        
-                        // Dapatkan nama lokasi
-                        const locationName = await getLocationName(position.coords.latitude, position.coords.longitude);
-                        locationNameElement.textContent = locationName;
-                    },
-                    (error) => {
-                        alert('Error melacak lokasi: ' + error.message);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    }
-                );
+                playerName = name;
+                usedNames.push(playerName);
+                document.getElementById('player-name').textContent = playerName;
+                loginModal.style.display = 'none';
                 
-            } else {
-                alert('Geolocation tidak didukung oleh browser Anda.');
+                // Update avatar
+                profilePic.src = `https://api.dicebear.com/6.x/adventurer/svg?seed=${avatarSeed}`;
+                
+                // Tambahkan ke daftar pemain online
+                updateOnlinePlayers();
+                
+                // Kirim pesan selamat datang
+                addChatMessage('system', `${playerName} bergabung dalam game!`);
             }
-        }
-        
-        // Hentikan pelacakan
-        function stopTracking() {
-            if (watchId) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-                
-                statusElement.className = 'status not-tracking';
-                statusElement.textContent = 'Tracking dihentikan';
-                statusInfoElement.textContent = 'Tidak aktif';
-            }
-        }
-        
-        // Perbarui tampilan informasi lokasi
-        function updateDisplay(position) {
-            const coords = position.coords;
-            currentLat = coords.latitude;
-            currentLng = coords.longitude;
             
-            latitudeElement.textContent = coords.latitude.toFixed(6);
-            longitudeElement.textContent = coords.longitude.toFixed(6);
-            accuracyElement.textContent = coords.accuracy.toFixed(2) + ' meter';
-            altitudeElement.textContent = coords.altitude ? coords.altitude.toFixed(2) + ' meter' : 'Tidak tersedia';
-            speedElement.textContent = coords.speed ? (coords.speed * 3.6).toFixed(2) + ' km/jam' : 'Tidak tersedia';
+            // Ganti background
+            function changeBackground(bgType) {
+                const bgImages = {
+                    'space': 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                    'clouds': 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                    'galaxy': 'https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                    'sky': 'https://images.unsplash.com/photo-1534447677768-be436bb09401?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'
+                };
+                
+                document.body.style.backgroundImage = `url(${bgImages[bgType]})`;
+            }
             
-            const now = new Date();
-            timestampElement.textContent = now.toLocaleTimeString();
-        }
-        
-        // Event listeners untuk tombol
-        startButton.addEventListener('click', startTracking);
-        stopButton.addEventListener('click', stopTracking);
-        googleMapsButton.addEventListener('click', openGoogleMaps);
-        
-        // Inisialisasi peta dengan lokasi default (Jakarta)
-        initMap();
+            // Update daftar pemain online
+            function updateOnlinePlayers() {
+                onlinePlayers.innerHTML = '';
+                usedNames.forEach(name => {
+                    const playerTag = document.createElement('div');
+                    playerTag.className = 'player-tag';
+                    playerTag.textContent = `${name} (Online)`;
+                    onlinePlayers.appendChild(playerTag);
+                });
+            }
+            
+            // Set jumlah taruhan
+            function setBetAmount(amount) {
+                amount = Math.min(amount, coins);
+                amount = Math.max(amount, 10);
+                betAmountInput.value = amount;
+            }
+            
+            // Update jumlah koin
+            function updateCoins(amount) {
+                coins += amount;
+                coinDisplay.textContent = coins.toLocaleString('id-ID');
+            }
+            
+            // Pasang taruhan
+            function placeBet() {
+                if (isPlaying) return;
+                
+                const betAmount = parseInt(betAmountInput.value);
+                
+                if (isNaN(betAmount) || betAmount < 10) {
+                    alert("Minimum taruhan adalah 10 koin!");
+                    return;
+                }
+                
+                if (betAmount > coins) {
+                    alert("Koin tidak cukup!");
+                    return;
+                }
+                
+                currentBet = betAmount;
+                updateCoins(-currentBet);
+                isPlaying = true;
+                currentMultiplier = 1.0;
+                
+                // Generate crash point acak antara 1.05 dan 10.0
+                crashPoint = (Math.random() * 9 + 1.05).toFixed(2);
+                
+                // Update UI
+                betButton.disabled = true;
+                cashoutButton.disabled = false;
+                betAmountInput.disabled = true;
+                
+                // Kirim pesan ke chat
+                addChatMessage('player', `${playerName} memasang taruhan ${currentBet.toLocaleString('id-ID')} koin!`);
+                
+                // Mulai game
+                startGame();
+            }
+            
+            // Mulai game
+            function startGame() {
+                clearInterval(gameInterval);
+                
+                gameInterval = setInterval(function() {
+                    // Naikkan multiplier
+                    currentMultiplier += 0.05;
+                    multiplierDisplay.textContent = `x${currentMultiplier.toFixed(2)}`;
+                    
+                    // Update grafik
+                    updateGraph();
+                    
+                    // Cek jika crash
+                    if (currentMultiplier >= crashPoint) {
+                        crash();
+                    }
+                }, 100);
+            }
+            
+            // Update grafik
+            function updateGraph() {
+                const graphHeight = (currentMultiplier / 10) * 100;
+                graphLine.style.height = `${Math.min(graphHeight, 100)}%`;
+                
+                // Ubah warna berdasarkan multiplier
+                if (currentMultiplier > 5) {
+                    graphLine.style.background = '#ff3366';
+                    graphLine.style.boxShadow = '0 0 10px #ff3366';
+                } else if (currentMultiplier > 3) {
+                    graphLine.style.background = '#ffcc00';
+                    graphLine.style.boxShadow = '0 0 10px #ffcc00';
+                } else {
+                    graphLine.style.background = '#00ff88';
+                    graphLine.style.boxShadow = '0 0 10px #00ff88';
+                }
+            }
+            
+            // Cashout
+            function cashout() {
+                if (!isPlaying) return;
+                
+                clearInterval(gameInterval);
+                
+                const winAmount = Math.floor(currentBet * currentMultiplier);
+                updateCoins(winAmount);
+                
+                // Tampilkan modal menang
+                document.getElementById('cashout-multiplier').textContent = `x${currentMultiplier.toFixed(2)}`;
+                document.getElementById('win-amount').textContent = winAmount.toLocaleString('id-ID');
+                winModal.style.display = 'flex';
+                
+                // Tambahkan ke history
+                addHistoryItem(currentMultiplier, true);
+                
+                // Kirim pesan ke chat
+                addChatMessage('system', `🎉 ${playerName} berhasil cashout di x${currentMultiplier.toFixed(2)} dan mendapatkan ${winAmount.toLocaleString('id-ID')} koin!`);
+                
+                // Reset game
+                resetGame();
+            }
+            
+            // Crash
+            function crash() {
+                clearInterval(gameInterval);
+                
+                // Tampilkan modal kalah
+                document.getElementById('crash-multiplier').textContent = `x${crashPoint}`;
+                loseModal.style.display = 'flex';
+                
+                // Tambahkan ke history
+                addHistoryItem(crashPoint, false);
+                
+                // Kirim pesan ke chat
+                addChatMessage('system', `💥 ${playerName} kalah pada multiplier x${crashPoint}!`);
+                
+                // Reset game
+                resetGame();
+            }
+            
+            // Reset game
+            function resetGame() {
+                isPlaying = false;
+                currentBet = 0;
+                currentMultiplier = 1.0;
+                
+                // Update UI
+                betButton.disabled = false;
+                cashoutButton.disabled = true;
+                betAmountInput.disabled = false;
+                multiplierDisplay.textContent = 'x1.00';
+                graphLine.style.height = '3px';
+            }
+            
+            // Tambahkan item history
+            function addHistoryItem(multiplier, isWin) {
+                const item = document.createElement('div');
+                item.className = `history-item ${isWin ? 'win' : 'lose'}`;
+                item.textContent = `x${multiplier.toFixed(2)}`;
+                historyItems.prepend(item);
+                
+                // Hapus item history jika terlalu banyak
+                if (historyItems.children.length > 10) {
+                    historyItems.removeChild(historyItems.lastChild);
+                }
+            }
+            
+            // Kirim pesan chat
+            function sendChatMessage() {
+                const message = chatInput.value.trim();
+                if (message !== '') {
+                    addChatMessage('player', `${playerName}: ${message}`);
+                    chatInput.value = '';
+                }
+            }
+            
+            // Tambahkan pesan ke chat
+            function addChatMessage(type, text) {
+                const messageDiv = document.createElement('div');
+                
+                if (type === 'player') {
+                    messageDiv.className = 'message message-player';
+                    const avatarImg = document.createElement('img');
+                    avatarImg.className = 'player-avatar';
+                    avatarImg.src = `https://api.dicebear.com/6.x/adventurer/svg?seed=${avatarSeed}`;
+                    messageDiv.appendChild(avatarImg);
+                    
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = text;
+                    messageDiv.appendChild(textSpan);
+                } else {
+                    messageDiv.className = 'message message-system';
+                    messageDiv.textContent = text;
+                }
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
     </script>
 </body>
 </html>

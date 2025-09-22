@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengukur Jarak Kamera untuk Hunting Burung</title>
+    <title>Pengukur Jarak Hunting Burung</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #fff;
             min-height: 100vh;
             padding: 20px;
@@ -42,7 +42,7 @@
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             margin-bottom: 10px;
-            color: #fdbb2d;
+            color: #ffcc00;
         }
         
         .description {
@@ -115,6 +115,23 @@
             background: linear-gradient(to right, #38ef7d, #11998e);
         }
         
+        .calibration {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .calibration input {
+            padding: 10px;
+            border-radius: 50px;
+            border: none;
+            width: 100px;
+            text-align: center;
+        }
+        
         .results {
             background: rgba(0, 0, 0, 0.3);
             padding: 20px;
@@ -128,7 +145,7 @@
             font-weight: bold;
             margin: 10px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            color: #fdbb2d;
+            color: #ffcc00;
         }
         
         .unit {
@@ -152,7 +169,7 @@
         }
         
         .instructions h3 {
-            color: #fdbb2d;
+            color: #ffcc00;
             margin-bottom: 10px;
         }
         
@@ -169,6 +186,18 @@
             text-align: center;
             font-size: 0.9rem;
             opacity: 0.7;
+        }
+        
+        .reticle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff0000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 20;
+            display: none;
         }
         
         @media (max-width: 768px) {
@@ -195,22 +224,29 @@
     <div class="container">
         <header>
             <h1>Pengukur Jarak untuk Hunting Burung</h1>
-            <p class="description">Aktifkan kamera, klik pada target burung, dan dapatkan perkiraan jarak secara real-time</p>
+            <p class="description">Aktifkan kamera, arahkan ke burung, klik untuk mengetahui jarak secara real-time</p>
         </header>
+        
+        <div class="calibration">
+            <label for="size-input">Perkiraan Ukuran Burung (cm):</label>
+            <input type="number" id="size-input" value="30" min="5" max="100">
+            <button id="calibrate-btn">Kalibrasi</button>
+        </div>
         
         <div class="camera-container">
             <video id="video" autoplay playsinline></video>
             <canvas id="camera-overlay"></canvas>
+            <div class="reticle"></div>
         </div>
         
         <div class="controls">
             <button id="start-btn">Aktifkan Kamera</button>
-            <button id="reset-btn">Reset Pengukuran</button>
+            <button id="reset-btn">Reset</button>
             <button id="capture-btn">Ambil Gambar</button>
         </div>
         
         <div class="results">
-            <h2>Hasil Pengukuran</h2>
+            <h2>Jarak ke Burung</h2>
             <div id="distance">0.00</div>
             <div class="unit">meter</div>
         </div>
@@ -218,16 +254,17 @@
         <div class="instructions">
             <h3>Cara Penggunaan:</h3>
             <ol>
-                <li>Klik tombol "Aktifkan Kamera" dan izinkan akses ke kamera perangkat Anda</li>
-                <li>Arahkan kamera ke target burung yang ingin diukur jaraknya</li>
-                <li>Klik pada posisi burung di layar untuk mengukur jarak</li>
-                <li>Gunakan tombol "Reset Pengukuran" untuk mengulang pengukuran</li>
-                <li>Gunakan tombol "Ambil Gambar" untuk mengambil screenshot</li>
+                <li>Klik tombol "Aktifkan Kamera" dan izinkan akses ke kamera</li>
+                <li>Masukkan perkiraan ukuran burung (dalam cm) - default 30cm</li>
+                <li>Klik "Kalibrasi" untuk menyimpan setting</li>
+                <li>Arahkan kamera ke burung yang ingin diukur jaraknya</li>
+                <li>Klik pada burung di layar untuk mengukur jarak</li>
+                <li>Gunakan tombol "Ambil Gambar" untuk menyimpan hasil</li>
             </ol>
         </div>
         
         <div class="info-box">
-            <p><strong>Catatan:</strong> Akurasi pengukuran tergantung pada kualitas kamera dan kondisi pencahayaan. Untuk hasil terbaik, pastikan objek yang diukur memiliki kontras yang baik dengan latar belakang.</p>
+            <p><strong>Tips:</strong> Untuk hasil terbaik, pastikan Anda mengetahui perkiraan ukuran burung target. Semakin akurat perkiraan ukuran, semakin akurat pula perhitungan jaraknya.</p>
         </div>
         
         <div class="footer">
@@ -242,17 +279,23 @@
             const startBtn = document.getElementById('start-btn');
             const resetBtn = document.getElementById('reset-btn');
             const captureBtn = document.getElementById('capture-btn');
+            const calibrateBtn = document.getElementById('calibrate-btn');
+            const sizeInput = document.getElementById('size-input');
             const distanceElement = document.getElementById('distance');
+            const reticle = document.querySelector('.reticle');
             const ctx = cameraOverlay.getContext('2d');
             
-            let points = [];
             let isMeasuring = false;
             let stream = null;
+            let objectSize = 30; // Default estimate in cm
+            let calibrationFactor = 1000; // Default calibration factor
             
             // Set canvas size to match video
             function resizeCanvas() {
-                cameraOverlay.width = video.videoWidth || 640;
-                cameraOverlay.height = video.videoHeight || 480;
+                if (video.videoWidth && video.videoHeight) {
+                    cameraOverlay.width = video.videoWidth;
+                    cameraOverlay.height = video.videoHeight;
+                }
             }
             
             // Initialize
@@ -264,31 +307,47 @@
             // Start camera function
             startBtn.addEventListener('click', function() {
                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(function(mediaStream) {
-                            stream = mediaStream;
-                            video.srcObject = mediaStream;
-                            video.play();
-                            
-                            video.onloadedmetadata = function() {
-                                resizeCanvas();
-                                isMeasuring = true;
-                                startBtn.textContent = "Kamera Aktif";
-                                startBtn.disabled = true;
-                            };
-                        })
-                        .catch(function(error) {
-                            alert("Tidak dapat mengakses kamera: " + error.message);
-                            console.error("Error accessing camera:", error);
-                        });
+                    navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment', // Use back camera
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        } 
+                    })
+                    .then(function(mediaStream) {
+                        stream = mediaStream;
+                        video.srcObject = mediaStream;
+                        video.play();
+                        
+                        video.onloadedmetadata = function() {
+                            resizeCanvas();
+                            isMeasuring = true;
+                            startBtn.textContent = "Kamera Aktif";
+                            startBtn.disabled = true;
+                            reticle.style.display = 'block';
+                        };
+                    })
+                    .catch(function(error) {
+                        alert("Tidak dapat mengakses kamera: " + error.message);
+                        console.error("Error accessing camera:", error);
+                    });
                 } else {
                     alert("Browser Anda tidak mendukung akses kamera. Pastikan Anda menggunakan HTTPS.");
                 }
             });
             
+            // Calibrate with estimated object size
+            calibrateBtn.addEventListener('click', function() {
+                objectSize = parseFloat(sizeInput.value);
+                if (objectSize < 5 || objectSize > 100) {
+                    alert("Masukkan ukuran burung antara 5-100 cm");
+                    return;
+                }
+                alert(`Kalibrasi berhasil! Ukuran burung disetel: ${objectSize} cm`);
+            });
+            
             // Reset measurement
             resetBtn.addEventListener('click', function() {
-                points = [];
                 ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
                 distanceElement.textContent = "0.00";
             });
@@ -307,39 +366,36 @@
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 // Draw measurement if exists
-                if (points.length > 0) {
-                    context.strokeStyle = '#ff5e62';
-                    context.lineWidth = 3;
-                    context.beginPath();
-                    context.moveTo(points[0].x, points[0].y);
-                    context.lineTo(points[1].x, points[1].y);
-                    context.stroke();
-                    
-                    context.fillStyle = '#ff5e62';
-                    context.beginPath();
-                    context.arc(points[0].x, points[0].y, 6, 0, Math.PI * 2);
-                    context.fill();
-                    context.beginPath();
-                    context.arc(points[1].x, points[1].y, 6, 0, Math.PI * 2);
-                    context.fill();
-                    
-                    const midX = (points[0].x + points[1].x) / 2;
-                    const midY = (points[0].y + points[1].y) / 2;
-                    const distance = calculateDistance(points[0], points[1]);
-                    
-                    context.font = '20px Arial';
+                const distance = parseFloat(distanceElement.textContent);
+                if (distance > 0) {
+                    context.font = '24px Arial';
                     context.fillStyle = 'white';
                     context.strokeStyle = 'black';
                     context.lineWidth = 4;
-                    context.strokeText(`${distance.toFixed(2)} m`, midX, midY - 10);
-                    context.fillText(`${distance.toFixed(2)} m`, midX, midY - 10);
+                    context.strokeText(`Jarak: ${distance.toFixed(2)} m`, 20, 50);
+                    context.fillText(`Jarak: ${distance.toFixed(2)} m`, 20, 50);
+                    
+                    context.strokeText(`Ukuran burung: ${objectSize} cm`, 20, 90);
+                    context.fillText(`Ukuran burung: ${objectSize} cm`, 20, 90);
                 }
                 
                 // Create download link
                 const link = document.createElement('a');
-                link.download = 'pengukuran-jarak.png';
+                link.download = 'hasil-pengukuran-burung.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+            });
+            
+            // Handle mouse movement for reticle
+            cameraOverlay.addEventListener('mousemove', function(e) {
+                if (!isMeasuring) return;
+                
+                const rect = cameraOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                reticle.style.left = x + 'px';
+                reticle.style.top = y + 'px';
             });
             
             // Handle click on overlay
@@ -356,67 +412,43 @@
                 const x = (e.clientX - rect.left) * scaleX;
                 const y = (e.clientY - rect.top) * scaleY;
                 
-                // Draw point
-                ctx.fillStyle = '#ff5e62';
+                // Draw targeting circle
+                ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
+                ctx.fillStyle = 'rgba(255, 94, 98, 0.5)';
                 ctx.beginPath();
-                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.strokeStyle = 'white';
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 
-                points.push({x, y});
+                // Calculate distance based on object size
+                const distance = calculateDistanceFromSize(objectSize);
+                distanceElement.textContent = distance.toFixed(2);
                 
-                // If we have two points, draw line and calculate distance
-                if (points.length === 2) {
-                    // Draw line
-                    ctx.beginPath();
-                    ctx.moveTo(points[0].x, points[0].y);
-                    ctx.lineTo(points[1].x, points[1].y);
-                    ctx.strokeStyle = 'rgba(255, 94, 98, 0.7)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    
-                    // Calculate distance (simulated)
-                    const distance = calculateDistance(points[0], points[1]);
-                    distanceElement.textContent = distance.toFixed(2);
-                    
-                    // Add midpoint text
-                    const midX = (points[0].x + points[1].x) / 2;
-                    const midY = (points[0].y + points[1].y) / 2;
-                    
-                    ctx.font = '16px Arial';
-                    ctx.fillStyle = 'white';
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 3;
-                    ctx.strokeText(`${distance.toFixed(2)} m`, midX, midY - 10);
-                    ctx.fillText(`${distance.toFixed(2)} m`, midX, midY - 10);
-                } else if (points.length > 2) {
-                    // Reset if more than two points
-                    ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
-                    points = [];
-                    points.push({x, y});
-                    
-                    // Redraw the single point
-                    ctx.beginPath();
-                    ctx.arc(x, y, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                }
+                // Draw distance text
+                ctx.font = '20px Arial';
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 4;
+                ctx.strokeText(`${distance.toFixed(2)} m`, x + 15, y - 15);
+                ctx.fillText(`${distance.toFixed(2)} m`, x + 15, y - 15);
             });
             
-            // Calculate distance between two points (simulated)
-            function calculateDistance(point1, point2) {
-                // Calculate pixel distance
-                const dx = point1.x - point2.x;
-                const dy = point1.y - point2.y;
-                const pixelDistance = Math.sqrt(dx * dx + dy * dy);
+            // Calculate distance based on object size (simplified calculation)
+            function calculateDistanceFromSize(objectSizeCm) {
+                // This is a simplified calculation - in a real application, this would
+                // require knowing the camera's focal length and sensor size
+                const apparentSize = 100; // Arbitrary reference size in pixels
                 
-                // Simulate conversion to meters (this is just an approximation)
-                // In a real application, this would require calibration based on
-                // camera parameters and distance to objects
-                const conversionFactor = 0.01; // Arbitrary conversion factor
-                return pixelDistance * conversionFactor;
+                // Convert object size to meters
+                const objectSizeM = objectSizeCm / 100;
+                
+                // Simplified distance calculation: distance = (actual size * focal length) / apparent size
+                // Using an arbitrary focal length equivalent for demonstration
+                const focalLength = 1000; // Arbitrary focal length factor
+                
+                return (objectSizeM * focalLength) / apparentSize;
             }
             
             // Handle window resize

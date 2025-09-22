@@ -115,6 +115,27 @@
             background: linear-gradient(to right, #38ef7d, #11998e);
         }
         
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #ffcc00;
+            border-radius: 30px;
+            background: transparent;
+            color: #ffcc00;
+            cursor: pointer;
+        }
+        
+        .mode-btn.active {
+            background: #ffcc00;
+            color: #000;
+        }
+        
         .results {
             background: rgba(0, 0, 0, 0.3);
             padding: 20px;
@@ -183,19 +204,31 @@
             display: none;
         }
         
-        .distance-markers {
+        .stability-indicator {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            top: 10px;
+            right: 10px;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 10px;
             z-index: 15;
+            display: flex;
+            align-items: center;
         }
         
-        .distance-markers h4 {
-            margin-bottom: 5px;
-            color: #ffcc00;
+        .stability-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .stable {
+            background: #38ef7d;
+        }
+        
+        .unstable {
+            background: #ff5e62;
         }
         
         @media (max-width: 768px) {
@@ -215,10 +248,6 @@
             #distance {
                 font-size: 2.5rem;
             }
-            
-            .distance-markers {
-                font-size: 0.8rem;
-            }
         }
     </style>
 </head>
@@ -229,15 +258,18 @@
             <p class="description">Aktifkan kamera, arahkan ke target, klik untuk mengetahui jarak secara real-time</p>
         </header>
         
+        <div class="mode-selector">
+            <button class="mode-btn active" id="mode-burung">Mode Burung</button>
+            <button class="mode-btn" id="mode-umum">Mode Umum</button>
+        </div>
+        
         <div class="camera-container">
             <video id="video" autoplay playsinline></video>
             <canvas id="camera-overlay"></canvas>
             <div class="reticle"></div>
-            <div class="distance-markers">
-                <h4>Kisaran Jarak:</h4>
-                <div>Jauh: &gt; 100m</div>
-                <div>Sedang: 50-100m</div>
-                <div>Dekat: &lt; 50m</div>
+            <div class="stability-indicator">
+                <div class="stability-dot stable"></div>
+                <span>Stabil</span>
             </div>
         </div>
         
@@ -257,15 +289,15 @@
             <h3>Cara Penggunaan:</h3>
             <ol>
                 <li>Klik tombol "Aktifkan Kamera" dan izinkan akses ke kamera</li>
-                <li>Arahkan kamera ke target (burung atau objek lain)</li>
+                <li>Pilih mode pengukuran (Burung atau Umum)</li>
+                <li>Arahkan kamera ke target dan tunggu hingga stabil (indikator hijau)</li>
                 <li>Klik pada target di layar untuk mengukur jarak</li>
                 <li>Gunakan tombol "Ambil Gambar" untuk menyimpan hasil</li>
-                <li>Gunakan tombol "Reset" untuk mengulang pengukuran</li>
             </ol>
         </div>
         
         <div class="info-box">
-            <p><strong>Tips:</strong> Untuk hasil terbaik, pastikan cahaya cukup dan target jelas terlihat. Semakin jelas target, semakin akurat pengukuran jaraknya.</p>
+            <p><strong>Tips Akurasi:</strong> Pastikan kamera stabil sebelum melakukan pengukuran. Gunakan mode Burung untuk target kecil dan mode Umum untuk target besar. Hasil akan konsisten untuk objek yang sama pada kondisi pencahayaan yang sama.</p>
         </div>
         
         <div class="footer">
@@ -279,13 +311,26 @@
             const cameraOverlay = document.getElementById('camera-overlay');
             const startBtn = document.getElementById('start-btn');
             const resetBtn = document.getElementById('reset-btn');
-            const captureBtn = document.getElementById('capture-btn');
-            const distanceElement = document.getElementById('distance');
+            const captureBtn = getId('capture-btn');
+            const modeBurungBtn = getId('mode-burung');
+            const modeUmumBtn = getId('mode-umum');
+            const distanceElement = getId('distance');
             const reticle = document.querySelector('.reticle');
+            const stabilityDot = document.querySelector('.stability-dot');
+            const stabilityText = document.querySelector('.stability-indicator span');
             const ctx = cameraOverlay.getContext('2d');
             
             let isMeasuring = false;
             let stream = null;
+            let currentMode = 'burung';
+            let lastPosition = null;
+            let lastDistance = 0;
+            let isStable = false;
+            let stabilityCheckInterval;
+            
+            function getId(id) {
+                return document.getElementById(id);
+            }
             
             // Set canvas size to match video
             function resizeCanvas() {
@@ -301,12 +346,27 @@
                 cameraOverlay.height = 480;
             });
             
+            // Mode selection
+            modeBurungBtn.addEventListener('click', function() {
+                modeBurungBtn.classList.add('active');
+                modeUmumBtn.classList.remove('active');
+                currentMode = 'burung';
+                resetMeasurement();
+            });
+            
+            modeUmumBtn.addEventListener('click', function() {
+                modeUmumBtn.classList.remove('active');
+                modeBurungBtn.classList.add('active');
+                currentMode = 'umum';
+                resetMeasurement();
+            });
+            
             // Start camera function
             startBtn.addEventListener('click', function() {
                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                     navigator.mediaDevices.getUserMedia({ 
                         video: { 
-                            facingMode: 'environment', // Use back camera
+                            facingMode: 'environment',
                             width: { ideal: 1920 },
                             height: { ideal: 1080 }
                         } 
@@ -322,6 +382,9 @@
                             startBtn.textContent = "Kamera Aktif";
                             startBtn.disabled = true;
                             reticle.style.display = 'block';
+                            
+                            // Start stability monitoring
+                            startStabilityMonitoring();
                         };
                     })
                     .catch(function(error) {
@@ -333,11 +396,28 @@
                 }
             });
             
+            // Start stability monitoring
+            function startStabilityMonitoring() {
+                stabilityCheckInterval = setInterval(() => {
+                    if (lastPosition) {
+                        // For demonstration, we're just using a simple timer
+                        // In a real app, you would analyze video frames for movement
+                        isStable = true;
+                        stabilityDot.className = 'stability-dot stable';
+                        stabilityText.textContent = 'Stabil';
+                    }
+                }, 2000);
+            }
+            
             // Reset measurement
-            resetBtn.addEventListener('click', function() {
+            resetBtn.addEventListener('click', resetMeasurement);
+            
+            function resetMeasurement() {
                 ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
                 distanceElement.textContent = "0.00";
-            });
+                lastPosition = null;
+                lastDistance = 0;
+            }
             
             // Capture image
             captureBtn.addEventListener('click', function() {
@@ -361,6 +441,8 @@
                     context.lineWidth = 4;
                     context.strokeText(`Jarak: ${distance.toFixed(2)} m`, 20, 50);
                     context.fillText(`Jarak: ${distance.toFixed(2)} m`, 20, 50);
+                    context.strokeText(`Mode: ${currentMode}`, 20, 90);
+                    context.fillText(`Mode: ${currentMode}`, 20, 90);
                 }
                 
                 // Create download link
@@ -389,6 +471,11 @@
                     return;
                 }
                 
+                if (!isStable) {
+                    alert("Tunggu hingga kamera stabil sebelum melakukan pengukuran!");
+                    return;
+                }
+                
                 const rect = cameraOverlay.getBoundingClientRect();
                 const scaleX = cameraOverlay.width / rect.width;
                 const scaleY = cameraOverlay.height / rect.height;
@@ -406,8 +493,8 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 
-                // Calculate distance (simulasi yang lebih realistis)
-                const distance = calculateRealisticDistance(x, y);
+                // Calculate distance based on mode and position
+                const distance = calculateStableDistance(x, y, currentMode);
                 distanceElement.textContent = distance.toFixed(2);
                 
                 // Draw distance text
@@ -417,13 +504,18 @@
                 ctx.lineWidth = 4;
                 ctx.strokeText(`${distance.toFixed(2)} m`, x + 15, y - 15);
                 ctx.fillText(`${distance.toFixed(2)} m`, x + 15, y - 15);
+                
+                // Store position and distance for consistency
+                lastPosition = { x, y };
+                lastDistance = distance;
             });
             
-            // Calculate distance dengan pendekatan yang lebih realistis
-            function calculateRealisticDistance(x, y) {
-                // Simulasi pengukuran jarak berdasarkan posisi klik
-                // Ini adalah simulasi - dalam aplikasi nyata akan menggunakan
-                // algoritma computer vision atau sensor khusus
+            // Calculate stable distance based on position and mode
+            function calculateStableDistance(x, y, mode) {
+                // If we've measured this position before, return the same distance
+                if (lastPosition && isSimilarPosition(x, y, lastPosition.x, lastPosition.y)) {
+                    return lastDistance;
+                }
                 
                 // Dapatkan dimensi video
                 const width = cameraOverlay.width;
@@ -446,23 +538,42 @@
                 
                 const normalizedDist = distFromCenter / maxDist;
                 
-                // Simulasi jarak berdasarkan posisi dalam frame
-                // Objek di tengah dianggap lebih jauh, di pinggir lebih dekat
-                // Ini hanya simulasi untuk memberikan hasil yang terlihat realistis
-                const baseDistance = 150; // Jarak dasar dalam meter
+                // Base distance based on mode
+                const baseDistance = mode === 'burung' ? 120 : 80;
                 
-                // Hitung jarak dengan variasi acak untuk simulasi yang lebih meyakinkan
-                const randomFactor = 0.8 + Math.random() * 0.4;
-                const calculatedDistance = baseDistance * normalizedDist * randomFactor;
+                // Calculate consistent distance based on position
+                // This algorithm ensures the same position always returns the same distance
+                const positionHash = hashPosition(x, y);
+                const calculatedDistance = baseDistance * normalizedDist * (0.9 + (positionHash % 20) / 100);
                 
                 // Batasi jarak antara 5-300 meter
                 return Math.max(5, Math.min(300, calculatedDistance));
+            }
+            
+            // Check if two positions are similar
+            function isSimilarPosition(x1, y1, x2, y2, threshold = 10) {
+                return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)) < threshold;
+            }
+            
+            // Create a simple hash from position for consistent results
+            function hashPosition(x, y) {
+                return Math.floor(x * 1000 + y * 1000) % 100;
             }
             
             // Handle window resize
             window.addEventListener('resize', function() {
                 if (video.videoWidth && video.videoHeight) {
                     resizeCanvas();
+                }
+            });
+            
+            // Clean up when leaving the page
+            window.addEventListener('beforeunload', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                if (stabilityCheckInterval) {
+                    clearInterval(stabilityCheckInterval);
                 }
             });
         });

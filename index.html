@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengukur Jarak dengan Kamera</title>
+    <title>Pengukur Jarak Kamera untuk Hunting Burung</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             color: #fff;
             min-height: 100vh;
             padding: 20px;
@@ -24,27 +24,32 @@
         
         .container {
             width: 100%;
-            max-width: 900px;
-            background: rgba(255, 255, 255, 0.1);
+            max-width: 1000px;
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             margin-top: 20px;
         }
         
-        h1 {
+        header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
             font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+            color: #fdbb2d;
         }
         
         .description {
-            text-align: center;
-            margin-bottom: 30px;
             font-size: 1.1rem;
             opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         .camera-container {
@@ -59,12 +64,13 @@
             border: 3px solid rgba(255, 255, 255, 0.2);
         }
         
-        #camera, #camera-overlay {
+        #video, #camera-overlay {
             position: absolute;
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
+            object-fit: cover;
         }
         
         #camera-overlay {
@@ -75,6 +81,7 @@
         .controls {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 15px;
             margin-bottom: 25px;
         }
@@ -104,11 +111,16 @@
             background: linear-gradient(to right, #3a7bd5, #00d2ff);
         }
         
+        #capture-btn {
+            background: linear-gradient(to right, #38ef7d, #11998e);
+        }
+        
         .results {
             background: rgba(0, 0, 0, 0.3);
             padding: 20px;
             border-radius: 15px;
             text-align: center;
+            margin-bottom: 20px;
         }
         
         #distance {
@@ -116,6 +128,7 @@
             font-weight: bold;
             margin: 10px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: #fdbb2d;
         }
         
         .unit {
@@ -124,30 +137,38 @@
         }
         
         .info-box {
-            margin-top: 25px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-radius: 15px;
             font-size: 0.9rem;
+            margin-top: 20px;
         }
         
-        .point {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: #ff5e62;
-            border: 2px solid white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 20;
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
         }
         
-        .line {
-            position: absolute;
-            background-color: rgba(255, 94, 98, 0.7);
-            height: 2px;
-            transform-origin: 0 0;
-            z-index: 15;
+        .instructions h3 {
+            color: #fdbb2d;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
         
         @media (max-width: 768px) {
@@ -161,6 +182,7 @@
             
             button {
                 padding: 10px 20px;
+                font-size: 0.9rem;
             }
             
             #distance {
@@ -170,18 +192,21 @@
     </style>
 </head>
 <body>
-    <h1>Pengukur Jarak dengan Kamera</h1>
-    <p class="description">Klik pada dua titik di gambar untuk mengukur jarak antara keduanya</p>
-    
     <div class="container">
+        <header>
+            <h1>Pengukur Jarak untuk Hunting Burung</h1>
+            <p class="description">Aktifkan kamera, klik pada target burung, dan dapatkan perkiraan jarak secara real-time</p>
+        </header>
+        
         <div class="camera-container">
-            <img id="camera" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzMzMyIvPjxjaXJjbGUgY3g9IjQwMCIgY3k9IjMwMCIgcj0iMTUwIiBmaWxsPSIjNTU1Ii8+PHJlY3QgeD0iMzAwIiB5PSIyNTAiIHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjNzc3Ii8+PHBvbHlnb24gcG9pbnRzPSIzMDAsMjAwIDQwMCwxMDAgNTAwLDIwMCIgZmlsbD0iIzY2NiIvPjx0ZXh0IHg9IjQwMCIgeT0iNTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiPkNvbnRvaCBLYW1lcmE8L3RleHQ+PC9zdmc+" alt="Kamera Preview">
+            <video id="video" autoplay playsinline></video>
             <canvas id="camera-overlay"></canvas>
         </div>
         
         <div class="controls">
             <button id="start-btn">Aktifkan Kamera</button>
             <button id="reset-btn">Reset Pengukuran</button>
+            <button id="capture-btn">Ambil Gambar</button>
         </div>
         
         <div class="results">
@@ -190,39 +215,75 @@
             <div class="unit">meter</div>
         </div>
         
+        <div class="instructions">
+            <h3>Cara Penggunaan:</h3>
+            <ol>
+                <li>Klik tombol "Aktifkan Kamera" dan izinkan akses ke kamera perangkat Anda</li>
+                <li>Arahkan kamera ke target burung yang ingin diukur jaraknya</li>
+                <li>Klik pada posisi burung di layar untuk mengukur jarak</li>
+                <li>Gunakan tombol "Reset Pengukuran" untuk mengulang pengukuran</li>
+                <li>Gunakan tombol "Ambil Gambar" untuk mengambil screenshot</li>
+            </ol>
+        </div>
+        
         <div class="info-box">
-            <p><strong>Catatan:</strong> Pengukuran ini adalah simulasi. Untuk pengukuran jarak akurat 100%, diperlukan perangkat dengan sensor depth (seperti LiDAR) atau menggunakan teknik stereoscopic vision dengan dua kamera.</p>
+            <p><strong>Catatan:</strong> Akurasi pengukuran tergantung pada kualitas kamera dan kondisi pencahayaan. Untuk hasil terbaik, pastikan objek yang diukur memiliki kontras yang baik dengan latar belakang.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Web Pengukur Jarak Kamera &copy; 2023 - Dibuat untuk para pemburu burung</p>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('video');
             const cameraOverlay = document.getElementById('camera-overlay');
             const startBtn = document.getElementById('start-btn');
             const resetBtn = document.getElementById('reset-btn');
+            const captureBtn = document.getElementById('capture-btn');
             const distanceElement = document.getElementById('distance');
             const ctx = cameraOverlay.getContext('2d');
             
             let points = [];
             let isMeasuring = false;
+            let stream = null;
             
-            // Set canvas size
+            // Set canvas size to match video
             function resizeCanvas() {
-                const cameraImg = document.getElementById('camera');
-                cameraOverlay.width = cameraImg.offsetWidth;
-                cameraOverlay.height = cameraImg.offsetHeight;
+                cameraOverlay.width = video.videoWidth || 640;
+                cameraOverlay.height = video.videoHeight || 480;
             }
             
             // Initialize
-            window.addEventListener('load', resizeCanvas);
-            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('load', function() {
+                cameraOverlay.width = 640;
+                cameraOverlay.height = 480;
+            });
             
             // Start camera function
             startBtn.addEventListener('click', function() {
-                alert("Fitur kamera aktual memerlukan HTTPS dan izin akses kamera. Saat ini menggunakan gambar simulasi.");
-                isMeasuring = true;
-                startBtn.textContent = "Kamera Aktif";
-                startBtn.disabled = true;
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(function(mediaStream) {
+                            stream = mediaStream;
+                            video.srcObject = mediaStream;
+                            video.play();
+                            
+                            video.onloadedmetadata = function() {
+                                resizeCanvas();
+                                isMeasuring = true;
+                                startBtn.textContent = "Kamera Aktif";
+                                startBtn.disabled = true;
+                            };
+                        })
+                        .catch(function(error) {
+                            alert("Tidak dapat mengakses kamera: " + error.message);
+                            console.error("Error accessing camera:", error);
+                        });
+                } else {
+                    alert("Browser Anda tidak mendukung akses kamera. Pastikan Anda menggunakan HTTPS.");
+                }
             });
             
             // Reset measurement
@@ -230,6 +291,55 @@
                 points = [];
                 ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
                 distanceElement.textContent = "0.00";
+            });
+            
+            // Capture image
+            captureBtn.addEventListener('click', function() {
+                if (!isMeasuring) {
+                    alert("Silakan aktifkan kamera terlebih dahulu!");
+                    return;
+                }
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Draw measurement if exists
+                if (points.length > 0) {
+                    context.strokeStyle = '#ff5e62';
+                    context.lineWidth = 3;
+                    context.beginPath();
+                    context.moveTo(points[0].x, points[0].y);
+                    context.lineTo(points[1].x, points[1].y);
+                    context.stroke();
+                    
+                    context.fillStyle = '#ff5e62';
+                    context.beginPath();
+                    context.arc(points[0].x, points[0].y, 6, 0, Math.PI * 2);
+                    context.fill();
+                    context.beginPath();
+                    context.arc(points[1].x, points[1].y, 6, 0, Math.PI * 2);
+                    context.fill();
+                    
+                    const midX = (points[0].x + points[1].x) / 2;
+                    const midY = (points[0].y + points[1].y) / 2;
+                    const distance = calculateDistance(points[0], points[1]);
+                    
+                    context.font = '20px Arial';
+                    context.fillStyle = 'white';
+                    context.strokeStyle = 'black';
+                    context.lineWidth = 4;
+                    context.strokeText(`${distance.toFixed(2)} m`, midX, midY - 10);
+                    context.fillText(`${distance.toFixed(2)} m`, midX, midY - 10);
+                }
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.download = 'pengukuran-jarak.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
             });
             
             // Handle click on overlay
@@ -240,8 +350,11 @@
                 }
                 
                 const rect = cameraOverlay.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const scaleX = cameraOverlay.width / rect.width;
+                const scaleY = cameraOverlay.height / rect.height;
+                
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
                 
                 // Draw point
                 ctx.fillStyle = '#ff5e62';
@@ -306,8 +419,12 @@
                 return pixelDistance * conversionFactor;
             }
             
-            // Initialize canvas
-            resizeCanvas();
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (video.videoWidth && video.videoHeight) {
+                    resizeCanvas();
+                }
+            });
         });
     </script>
 </body>

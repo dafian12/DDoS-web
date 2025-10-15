@@ -1,112 +1,224 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unban WhatsApp</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Unban WhatsApp — Special Edition</title>
   <style>
-    body {
-      background: radial-gradient(circle at top, #0f172a, #000);
-      font-family: 'Poppins', sans-serif;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      overflow: hidden;
+    /* Dark futuristic / C2-ish style */
+    :root{
+      --bg1:#05060a;
+      --bg2:#071028;
+      --card: rgba(255,255,255,0.04);
+      --accent1:#00d4ff;
+      --accent2:#6f42c1;
+      --muted:#9aa7bf;
     }
-    .container {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 0 20px rgba(0,150,255,0.3);
-      border-radius: 20px;
-      padding: 30px 25px;
-      width: 320px;
-      animation: fadeIn 1s ease-in-out;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(16,24,40,0.6), transparent),
+                  radial-gradient(900px 400px at 90% 90%, rgba(79,70,229,0.06), transparent),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#e6eef8;
+      padding:24px;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .frame{
+      width:360px;
+      max-width:95%;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 8px 40px rgba(2,6,23,0.6), 0 0 40px rgba(0,212,255,0.03);
+      padding:20px;
+      position:relative;
+      overflow:hidden;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #00aaff;
+    .header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
     }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      margin-bottom: 15px;
-      font-size: 14px;
+    .logo{
+      width:48px;height:48px;border-radius:10px;
+      background: linear-gradient(135deg,var(--accent1),var(--accent2));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:#021025;box-shadow:0 6px 20px rgba(79,70,229,0.12);
     }
-    input, select {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
+    h1{
+      font-size:18px;margin:0;
+      letter-spacing:0.2px;color:var(--accent1);
     }
-    button {
-      background: linear-gradient(45deg, #007bff, #00d4ff);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
+    p.subtitle{margin:0;font-size:12px;color:var(--muted);}
+    .form{
+      margin-top:14px;
     }
-    button:hover {
-      opacity: 0.85;
-      box-shadow: 0 0 10px #00bfff;
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
+    input[type="text"], select, textarea {
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background: rgba(3,6,14,0.5);
+      color: #e8f6ff;
+      font-size:14px;
+      outline:none;
     }
-    .ai-note {
-      text-align: center;
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 8px;
-      opacity: 0.7;
+    textarea{min-height:110px;resize:vertical;}
+    .row{display:flex;gap:10px;}
+    .small{flex:1}
+    .btn{
+      margin-top:12px;
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      background: linear-gradient(90deg,var(--accent2),var(--accent1));
+      border:none;color:#021025;font-weight:700;
+      cursor:pointer;font-size:14px;
+      box-shadow: 0 8px 30px rgba(0,212,255,0.08);
     }
+    .btn:active{transform:translateY(1px)}
+    .note{margin-top:10px;font-size:12px;color:var(--muted);text-align:center;}
+    .ai-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px;color:var(--muted);margin-top:8px;}
+    .preview{
+      margin-top:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:8px;padding:10px;border:1px dashed rgba(255,255,255,0.03);
+      font-size:13px;color:#dcefff;min-height:72px;
+      white-space:pre-wrap;
+    }
+    .footer{
+      margin-top:14px;text-align:center;font-size:12px;color:var(--muted);
+    }
+    .tiny{font-size:11px;color:#93a7c7}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Unban WhatsApp</h2>
-    <input type="number" id="waNumber" placeholder="Nomor WhatsApp yang diblokir">
-    <select id="reason">
-      <option value="">-- Pilih Opsi Banding --</option>
-      <option value="permanent">Unban Permanen</option>
-      <option value="spam">Unban Spam</option>
-    </select>
-    <button onclick="sendEmail()">KIRIM BANDING</button>
-    <div class="ai-note">Generated by AI Assistant ⚡</div>
+  <div class="frame" role="main" aria-labelledby="title">
+    <div class="header">
+      <div class="logo">UB</div>
+      <div>
+        <h1 id="title">Unban WhatsApp — Special</h1>
+        <p class="subtitle">Form banding otomatis — Teks AI khusus untuk opsi SPAM</p>
+      </div>
+    </div>
+
+    <div class="form" aria-live="polite">
+      <label for="waNumber">Nomor WhatsApp yang diblokir</label>
+      <input id="waNumber" type="text" placeholder="contoh: 6281234567890" inputmode="numeric" />
+
+      <label for="reason">Pilih Opsi Banding</label>
+      <select id="reason">
+        <option value="">-- Pilih Opsi Banding --</option>
+        <option value="permanent">Unban Permanen (pakai teks manual)</option>
+        <option value="spam">Unban Spam (Teks Spesial AI)</option>
+      </select>
+
+      <button class="btn" id="sendBtn" onclick="sendEmail()">KIRIM BANDING</button>
+
+      <div class="note">
+        <span class="ai-badge">Generated by AI Assistant • Special Spam Text</span>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Preview Pesan</label>
+        <div class="preview" id="preview">Pilih opsi dan masukkan nomor untuk melihat preview pesan.</div>
+      </div>
+
+      <div class="footer tiny">
+        Mengarahkan ke aplikasi email (Gmail) dengan tujuan: <strong>accessibility@support.whatsapp.com</strong>
+      </div>
+    </div>
   </div>
 
-  <script>
-    function sendEmail() {
-      const number = document.getElementById('waNumber').value.trim();
-      const reason = document.getElementById('reason').value;
-      if (!number || !reason) {
-        alert('Harap isi nomor dan pilih alasan dulu!');
-        return;
-      }
-
-      let message = "";
-      if (reason === "permanent") {
-        message = `Merhaba. +${number} WhatsApp numaralı bir kullanıcıyım ve hiçbir sebep yokken engellendim. Lütfen WhatsApp hesabımla ilgili bu sorunu çözmeme yardımcı olun ve WhatsApp hesabımı en kısa sürede yeniden açın. Teşekkürler.`;
-      } else if (reason === "spam") {
-        const aiTexts = [
-          `Halo tim WhatsApp, akun saya diblokir karena kesalahan sistem. Mohon bantu periksa kembali dan pulihkan akun saya. Terima kasih.`,
-          `Hai WhatsApp Support, saya yakin akun saya ditandai spam secara tidak sengaja. Mohon bantu aktifkan kembali akun saya secepatnya.`,
-          `Selamat siang tim WhatsApp, saya pengguna aktif dan tidak melakukan pelanggaran. Mohon bantu tinjau ulang pemblokiran akun saya.`
-        ];
-        message = aiTexts[Math.floor(Math.random() * aiTexts.length)];
-      }
-
-      const subject = encodeURIComponent("Permohonan Unban WhatsApp");
-      const body = encodeURIComponent(message);
-      const email = "accessibility@support.whatsapp.com";
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+<script>
+  // Utility: ensure + prefix (if user enters leading 0 or starts with 62)
+  function normalizeNumber(raw) {
+    if (!raw) return "";
+    raw = raw.replace(/\s+/g, "").replace(/[^0-9+]/g,"");
+    if (raw.startsWith("+")) return raw;
+    // jika mulai dengan 0 -> ubah 0... ke +62...
+    if (raw.startsWith("0")) {
+      return "+62" + raw.slice(1);
     }
-  </script>
+    // jika mulai dengan 62 -> +62...
+    if (raw.startsWith("62")) {
+      return "+" + raw;
+    }
+    // jika angka lain, tambahkan + di depan
+    return "+" + raw;
+  }
+
+  const permanentTextFixed = (num) => {
+    return `Merhaba. ${num} WhatsApp numaralı bir kullanıcıyım ve hiçbir sebep yokken engellendim. Lütfen WhatsApp hesabımla ilgili bu sorunu çözmeme yardımcı olun ve WhatsApp hesabımı en kısa sürede yeniden açın. Teşekkürler.`;
+  };
+
+  // Daftar template spam yang lebih "spesial" dan persuasif — semua menyertakan nomor
+  const spamTemplates = [
+    (num) => `Halo Tim WhatsApp,\n\nSaya pemilik akun dengan nomor ${num}. Akun saya diblokir secara tiba-tiba atas klaim spam/penyalahgunaan, padahal saya tidak melakukan tindakan seperti itu. Pemblokiran ini sangat mengganggu aktivitas pribadi dan pekerjaan saya. Mohon tinjau ulang log aktivitas dan buktikan bahwa tidak ada pelanggaran serius. Saya minta pemulihan akses segera.\n\nTerima kasih atas bantuannya.`,
+    (num) => `Kepada Tim Support WhatsApp,\n\nAkun saya (${num}) telah diblokir karena dugaan spam. Saya yakin ini adalah kesalahan deteksi otomatis atau abuse report yang tidak valid. Saya siap bekerja sama dan memberikan bukti bahwa aktivitas saya normal. Mohon prioritaskan peninjauan dan pulihkan akun saya secepatnya. Kehilangan akses ini berdampak besar.\n\nHormat saya.`,
+    (num) => `Hi WhatsApp Accessibility Team,\n\nNomor ${num} milik saya telah diblokir dengan alasan spam. Ini keliru — saya tidak mengirim pesan massal, tidak menggunakan automation, dan selalu mematuhi kebijakan. Mohon lakukan investigasi mendalam (log & metadata) dan segera kembalikan akses. Jika ada data yang kalian perlukan dari saya, saya siap membantu.\n\nMohon segera diproses.`,
+    (num) => `Permintaan Peninjauan: ${num}\n\nTim WhatsApp yang terhormat, akun saya terblokir secara permanen akibat dugaan spam. Saya menilai ini false-positive yang merugikan. Mohon lakukan override manual oleh tim kalian karena mekanisme otomatis gagal. Mohon pulihkan akun agar saya tidak kehilangan kontak penting. Terima kasih.`
+  ];
+
+  const previewEl = document.getElementById('preview');
+  const waInput = document.getElementById('waNumber');
+  const reasonSel = document.getElementById('reason');
+
+  function buildMessage(number, reason) {
+    const normalized = normalizeNumber(number);
+    if (!reason) return "Pilih opsi banding untuk menampilkan preview.";
+    if (reason === "permanent") {
+      return permanentTextFixed(normalized);
+    } else if (reason === "spam") {
+      // ambil satu template acak, sisipkan nomor
+      const tpl = spamTemplates[Math.floor(Math.random()*spamTemplates.length)];
+      return tpl(normalized);
+    }
+    return "";
+  }
+
+  function updatePreview() {
+    const num = waInput.value;
+    const reason = reasonSel.value;
+    const text = buildMessage(num, reason);
+    previewEl.textContent = text;
+  }
+
+  // update preview saat input berubah
+  waInput.addEventListener('input', updatePreview);
+  reasonSel.addEventListener('change', updatePreview);
+
+  function sendEmail() {
+    const raw = waInput.value.trim();
+    const reason = reasonSel.value;
+    if (!raw) { alert("Masukkan nomor WhatsApp dulu."); waInput.focus(); return; }
+    if (!reason) { alert("Pilih opsi banding dulu."); reasonSel.focus(); return; }
+
+    const normalized = normalizeNumber(raw);
+    const message = buildMessage(raw, reason);
+
+    // Jika user memilih spam, tampilkan pesan peringatan singkat untuk memastikan
+    // (tetap langsung mengarahkan ke mailto)
+    const subject = encodeURIComponent("Permohonan Unban WhatsApp");
+    const body = encodeURIComponent(message + "\n\n--\nIni dibuat oleh Unban WhatsApp Special Tool.");
+    const to = "accessibility@support.whatsapp.com";
+
+    // Mailto: buka aplikasi email default (Gmail) dengan alamat & body terisi
+    const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+
+    // fallback: jika browser mencegah, buka di tab baru
+    window.location.href = mailto;
+  }
+
+  // inisialisasi preview default
+  updatePreview();
+</script>
 </body>
 </html>

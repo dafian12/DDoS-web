@@ -12,7 +12,7 @@ function startFlood() {
     statusDiv.innerHTML = 'Flooding reports...';
 
     const floodInterval = setInterval(() => {
-        fetch(`https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage`, {
+        fetch(`https://api.telegram.org/bot<8021598214:AAF-6-530XLoDwvLLozV0Gs6Tz8ulFTW-ho>/sendMessage`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

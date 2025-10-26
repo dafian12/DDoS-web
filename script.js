@@ -1,40 +1,50 @@
 javascript
-function startFlood() {
+function startOSINT() {
     const target = document.getElementById('target').value;
-    const statusDiv = document.getElementById('status');
-    let reportsSent = 0;
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<p>Gathering information...</p>';
 
-    if (!target) {
-        statusDiv.innerHTML = 'Please enter a target username or channel link.';
-        return;
-    }
+    // Simple OSINT functions
+    const osintFunctions = [
+        { name: 'Username Check', func: checkUsername },
+        { name: 'Email Check', func: checkEmail },
+        { name: 'IP Tracking', func: trackIP },
+        { name: 'Social Media Profiles', func: findSocialMedia }
+    ];
 
-    statusDiv.innerHTML = 'Flooding reports...';
-
-    const floodInterval = setInterval(() => {
-        fetch(`https://api.telegram.org/bot<8021598214:AAF-6-530XLoDwvLLozV0Gs6Tz8ulFTW-ho>/sendMessage`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: '@spambot',
-                text: `/report ${target} spam`
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.ok) {
-                reportsSent++;
-                statusDiv.innerHTML = `Reports sent: ${reportsSent}`;
-            } else {
-                clearInterval(floodInterval);
-                statusDiv.innerHTML = 'Flooding stopped. Target might be banned.';
-            }
-        })
-        .catch(error => {
-            clearInterval(floodInterval);
-            statusDiv.innerHTML = 'Error occurred. Flooding stopped.';
-        });
-    }, 1000); // Adjust the interval as needed
+    osintFunctions.forEach(async (osint) => {
+        try {
+            const result = await osint.func(target);
+            resultsDiv.innerHTML += `<strong>${osint.name}:</strong> ${result}<br>`;
+        } catch (error) {
+            resultsDiv.innerHTML += `<strong>${osint.name}:</strong> Error: ${error.message}<br>`;
+        }
+    });
 }
+
+async function checkUsername(username) {
+    // Placeholder for username check logic
+    return `Username ${username} found on multiple platforms.`;
+}
+
+async function checkEmail(email) {
+    // Placeholder for email check logic
+    return `Email ${email} found in data breaches.`;
+}
+
+async function trackIP(ip) {
+    // Placeholder for IP tracking logic
+    return `IP ${ip} tracked to a location in [Insert Fake Location].`;
+}
+
+async function findSocialMedia(target) {
+    // Placeholder for social media profile finding logic
+    return `Social media profiles found: [Insert Fake Profiles].`;
+}
+
+// Tracking user activities
+document.addEventListener('keydown', (event) => {
+    const userActivity = document.createElement('p');
+    userActivity.innerText = `User pressed: ${event.key}`;
+    document.body.appendChild(userActivity);
+});

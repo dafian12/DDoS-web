@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Mass Report - Login</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fab fa-whatsapp"></i>
+                    <h1>WhatsApp Mass Report</h1>
+                </div>
+                <p class="subtitle">v2.0 - Advanced Reporting System</p>
+            </div>
+
+            <div class="login-body">
+                <div class="status-container" id="statusContainer">
+                    <div class="status-indicator offline">
+                        <div class="status-dot"></div>
+                        <span>OFFLINE</span>
+                    </div>
+                    <p class="status-text" id="statusText">
+                        WhatsApp belum terhubung. Klik tombol di bawah untuk memulai.
+                    </p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="initializeBtn">
+                        <i class="fas fa-play"></i> Inisialisasi WhatsApp Bot
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="checkStatusBtn">
+                        <i class="fas fa-sync"></i> Cek Status
+                    </button>
+                </div>
+
+                <div class="pairing-container" id="pairingContainer" style="display: none;">
+                    <div class="pairing-header">
+                        <i class="fas fa-qrcode"></i>
+                        <h3>Pairing WhatsApp</h3>
+                    </div>
+                    
+                    <div class="pairing-code" id="pairingCodeDisplay">
+                        <div class="code-placeholder">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Menghasilkan kode pairing...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h4>Cara Pairing:</h4>
+                        <ol>
+                            <li>Buka WhatsApp di HP Anda</li>
+                            <li>Pergi ke <strong>Settings > Linked Devices</strong></li>
+                            <li>Pilih <strong>Link a Device</strong></li>
+                            <li>Masukkan kode 6 digit di atas</li>
+                            <li>Tunggu hingga terhubung</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="connection-status" id="connectionStatus">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Belum terhubung</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-access" id="dashboardAccess" style="display: none;">
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>WhatsApp Berhasil Terhubung!</h3>
+                        <p>Anda sekarang dapat mengakses dashboard untuk mulai melaporkan.</p>
+                    </div>
+                    
+                    <a href="/dashboard" class="btn btn-success">
+                        <i class="fas fa-tachometer-alt"></i> Buka Dashboard
+                    </a>
+                </div>
+
+                <div class="login-footer">
+                    <p class="warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>PERINGATAN:</strong> Tool ini untuk keperluan edukasi dan testing server pribadi saja. Penggunaan ilegal adalah tanggung jawab pengguna.
+                    </p>
+                    
+                    <div class="system-info">
+                        <p><i class="fas fa-code"></i> WhatsApp Web API v2.2412.54</p>
+                        <p><i class="fas fa-database"></i> MongoDB Session Storage</p>
+                        <p><i class="fas fa-server"></i> Vercel Serverless</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="system-log">
+            <h4><i class="fas fa-terminal"></i> System Log</h4>
+            <div class="log-box" id="logBox">
+                <div class="log-entry">
+                    <span class="log-time">[00:00:00]</span>
+                    <span class="log-message">System initialized. Ready to connect WhatsApp.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>

@@ -1,12 +1,14 @@
 {
   "name": "whatsapp-mass-report",
   "version": "2.0.0",
-  "description": "WhatsApp Mass Report Tool with Pairing Code Login",
+  "description": "WhatsApp Mass Report Tool with Pairing Code Login - Netlify Deployment",
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
     "dev": "nodemon api/index.js",
-    "deploy": "vercel --prod",
+    "build": "echo \"No build required for Node.js\"",
+    "netlify-dev": "netlify dev",
+    "netlify-deploy": "netlify deploy --prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -17,20 +19,26 @@
     "mongoose": "^7.5.0",
     "dotenv": "^16.3.1",
     "cors": "^2.8.5",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "socket.io-client": "^4.7.2",
+    "axios": "^1.6.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
-    "vercel": "^28.18.0"
+    "@netlify/functions": "^2.0.0",
+    "netlify-cli": "^17.0.0"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "keywords": [
     "whatsapp",
     "report",
-    "tool",
-    "automation"
+    "automation",
+    "netlify"
   ],
   "author": "BREACH-GPT",
   "license": "MIT"
